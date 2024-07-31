@@ -1,4 +1,4 @@
-from app.exception_handler import ExceptionHandlerStore
+from app.exception_handler_store import ExceptionHandlerStore
 from app.game_loop import GameLoop
 
 

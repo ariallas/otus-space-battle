@@ -2,7 +2,7 @@ from collections.abc import Callable
 from queue import Queue
 
 from app.command import ICommand
-from app.exception_handler import ExceptionHandlerStore
+from app.exception_handler_store import ExceptionHandlerStore
 
 
 class GameLoop:
@@ -28,4 +28,4 @@ class GameLoop:
             try:
                 cmd.execute()
             except Exception as exc:
-                self._exception_handler_store.create_handler(cmd, exc).execute()
+                self._exception_handler_store.create_handler_command(cmd, exc).execute()

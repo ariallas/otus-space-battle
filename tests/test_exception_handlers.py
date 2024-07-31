@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -17,7 +17,7 @@ from tests.mocks import MockCommand
 class TestError(Exception): ...
 
 
-@pytest.fixture()
+@pytest.fixture(autouse=True)
 def _reset_game_state() -> None:
     game_state.reset()
 
@@ -25,7 +25,8 @@ def _reset_game_state() -> None:
 @pytest.fixture()
 def mock_log_exception_command(monkeypatch: pytest.MonkeyPatch) -> Mock:
     """
-    Создать мок для объектов LogExceptionCommand
+    Создать мок для инстанса LogExceptionCommand, который
+    будет создаваться в обработчиках исключений
     """
     instance_mock = Mock(spec_set=LogExceptionCommand)
     constructor_mock = Mock()
@@ -38,8 +39,7 @@ def mock_log_exception_command(monkeypatch: pytest.MonkeyPatch) -> Mock:
     return instance_mock
 
 
-@pytest.mark.usefixtures("_reset_game_state")
-def test_delayed_log_exception(mock_log_exception_command: MagicMock) -> None:
+def test_delayed_log_exception(mock_log_exception_command: Mock) -> None:
     """
     Тест обработчика для логгирования исключения
     """
@@ -54,7 +54,6 @@ def test_delayed_log_exception(mock_log_exception_command: MagicMock) -> None:
     mock_log_exception_command.execute.assert_called_once()
 
 
-@pytest.mark.usefixtures("_reset_game_state")
 def test_delayed_first_retry() -> None:
     """
     Тест обработчика для повторного добавления команд в очередь
@@ -71,8 +70,7 @@ def test_delayed_first_retry() -> None:
     assert cmd.execute.call_count == 2
 
 
-@pytest.mark.usefixtures("_reset_game_state")
-def test_one_retry_then_log(mock_log_exception_command: MagicMock) -> None:
+def test_one_retry_then_log(mock_log_exception_command: Mock) -> None:
     """
     Тест стратегии: при первом выбросе исключения повторить команду,
     при повторном выбросе исключения записать информацию в лог
@@ -80,8 +78,8 @@ def test_one_retry_then_log(mock_log_exception_command: MagicMock) -> None:
     game_state.exception_handler_store.register_handler(
         MockCommand, TestError, delayed_first_retry_handler
     )
-    game_state.exception_handler_store.register_handler(
-        FirstRetryCommand, TestError, delayed_log_exception_handler
+    game_state.exception_handler_store.register_default_command_handler(
+        FirstRetryCommand, delayed_log_exception_handler
     )
     cmd = MockCommand()
     cmd.execute = Mock(side_effect=TestError)
@@ -93,8 +91,7 @@ def test_one_retry_then_log(mock_log_exception_command: MagicMock) -> None:
     mock_log_exception_command.execute.assert_called_once()
 
 
-@pytest.mark.usefixtures("_reset_game_state")
-def test_two_retries_then_log(mock_log_exception_command: MagicMock) -> None:
+def test_two_retries_then_log(mock_log_exception_command: Mock) -> None:
     """
     Тест стратегии: повторить два раза, потом записать в лог
     """
@@ -104,8 +101,8 @@ def test_two_retries_then_log(mock_log_exception_command: MagicMock) -> None:
     game_state.exception_handler_store.register_handler(
         FirstRetryCommand, TestError, delayed_second_retry_handler
     )
-    game_state.exception_handler_store.register_handler(
-        SecondRetryCommand, TestError, delayed_log_exception_handler
+    game_state.exception_handler_store.register_default_command_handler(
+        SecondRetryCommand, delayed_log_exception_handler
     )
     cmd = MockCommand()
     cmd.execute = Mock(side_effect=TestError)

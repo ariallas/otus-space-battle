@@ -37,10 +37,6 @@ def delayed_first_retry_handler(cmd: ICommand, _exc: Exception) -> ICommand:
     return DelayedCommand(FirstRetryCommand(cmd))
 
 
-def first_retry_immediately_handler(cmd: ICommand, _exc: Exception) -> ICommand:
-    return FirstRetryCommand(cmd)
-
-
 class SecondRetryCommand(ICommand):
     def __init__(self, cmd: ICommand) -> None:
         self._cmd = cmd
