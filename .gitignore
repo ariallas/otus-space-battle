@@ -1,0 +1,7 @@
+.*
+!.github
+!.gitignore
+!.pre-commit-config.yaml
+
+__*
+!__init__.py
