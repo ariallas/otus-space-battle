@@ -3,6 +3,7 @@ from typing import override
 
 from loguru import logger
 
+from app.command import ICommand
 from app.game_object import UObject
 from app.value_types import Angle, Vector
 
@@ -37,10 +38,11 @@ class MovableAdapter(IMovable):
         return Vector.from_angle_and_length(angle, velocity)
 
 
-class Move:
+class Move(ICommand):
     def __init__(self, movable: IMovable) -> None:
         self._movable = movable
 
+    @override
     def execute(self) -> None:
         pos = self._movable.get_position()
         velocity = self._movable.get_velocity()
