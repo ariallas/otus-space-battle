@@ -1,5 +1,6 @@
 from typing import Any, override
 
+from app.command import ICommand
 from app.game_object import UObject
 
 
@@ -17,3 +18,8 @@ class MockUObject(UObject):
 
     def __repr__(self) -> str:
         return f"MockUObject({self._props})"
+
+
+class MockCommand(ICommand):
+    def execute(self) -> None:
+        pass

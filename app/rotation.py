@@ -3,6 +3,7 @@ from typing import override
 
 from loguru import logger
 
+from app.command import ICommand
 from app.game_object import UObject
 from app.value_types import Angle
 
@@ -37,10 +38,11 @@ class RotatableAdapter(IRotatable):
         return self._uobject.get_property("rotatable_angular_velocity")
 
 
-class Rotate:
+class Rotate(ICommand):
     def __init__(self, rotatable: IRotatable) -> None:
         self._rotatable = rotatable
 
+    @override
     def execute(self) -> None:
         direction = self._rotatable.get_angle()
         velocity = self._rotatable.get_angular_velocity()
