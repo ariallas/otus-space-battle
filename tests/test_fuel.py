@@ -32,6 +32,3 @@ def test_burn_fuel() -> None:
     assert consumer.get_fuel_amount() == 5
     BurnFuelCommand(consumer).execute()
     assert consumer.get_fuel_amount() == 0
-
-    with pytest.raises(CommandError):
-        BurnFuelCommand(UsesFuelAdapter(uobj)).execute()

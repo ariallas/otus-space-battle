@@ -35,10 +35,6 @@ class UsesFuelAdapter(IConsumesFuel):
         return self._uobject.get_property("fuel_consumption")
 
 
-def _raise_fuel_exception(current: int, required: int) -> None:
-    raise CommandError(f"Not enough fuel: has {current} fuel, needs {required}")
-
-
 class CheckFuelCommand(ICommand):
     def __init__(self, consumer: IConsumesFuel) -> None:
         self._consumer = consumer
@@ -49,7 +45,7 @@ class CheckFuelCommand(ICommand):
         required = self._consumer.get_fuel_consumption()
         logger.debug(f"Checking if {self._consumer} has enough fuel: {current=}, {required=}")
         if current < required:
-            _raise_fuel_exception(current, required)
+            raise CommandError(f"Not enough fuel: has {current} fuel, needs {required}")
 
 
 class BurnFuelCommand(ICommand):
@@ -61,6 +57,4 @@ class BurnFuelCommand(ICommand):
         current = self._consumer.get_fuel_amount()
         required = self._consumer.get_fuel_consumption()
         logger.debug(f"Burning fuel for {self._consumer}: {current=}, {required=}")
-        if current < required:
-            _raise_fuel_exception(current, required)
         self._consumer.set_fuel_amount(current - required)
