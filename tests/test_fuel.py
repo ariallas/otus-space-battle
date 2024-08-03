@@ -6,8 +6,11 @@ from app.game_object import UObject
 from tests.mocks import MockUObject
 
 
-def make_fuel_consumer_uobject(amount: int, consumption: int) -> UObject:
-    uobj = MockUObject()
+def make_fuel_consumer_uobject(
+    amount: int, consumption: int, uobj: UObject | None = None
+) -> UObject:
+    if not uobj:
+        uobj = MockUObject()
     uobj.set_property("fuel_amount", amount)
     uobj.set_property("fuel_consumption", consumption)
     return uobj

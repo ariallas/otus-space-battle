@@ -1,1 +1,5 @@
 - Разбить на папки (Interfces, Implementations?)
+- добавить @override
+- переименовать game_object.py
+- куда все-таки класть исключения?
+- переименовать TestError

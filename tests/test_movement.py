@@ -11,8 +11,11 @@ from tests.mocks import MockUObject
 DIRS_NUMBER = 72
 
 
-def make_movable_uobject(position: Vector, velocity: Vector) -> UObject:
-    uobj = MockUObject()
+def make_movable_uobject(
+    position: Vector, velocity: Vector, uobj: UObject | None = None
+) -> UObject:
+    if not uobj:
+        uobj = MockUObject()
     uobj.set_property("movable_position", position)
     uobj.set_property("movable_angle", velocity.get_angle(DIRS_NUMBER))
     uobj.set_property("movable_abs_velocity", velocity.get_length())

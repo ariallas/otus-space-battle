@@ -11,8 +11,11 @@ from tests.mocks import MockUObject
 DIRS_NUMBER = 72
 
 
-def make_rotatable_uobject(angle: Angle, angular_velocity: Angle) -> UObject:
-    uobj = MockUObject()
+def make_rotatable_uobject(
+    angle: Angle, angular_velocity: Angle, uobj: UObject | None = None
+) -> UObject:
+    if not uobj:
+        uobj = MockUObject()
     uobj.set_property("rotatable_angle", angle)
     uobj.set_property("rotatable_angular_velocity", angular_velocity)
     return uobj
