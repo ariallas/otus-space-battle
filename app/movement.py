@@ -38,7 +38,7 @@ class MovableAdapter(IMovable):
         return Vector.from_angle_and_length(angle, velocity)
 
 
-class Move(ICommand):
+class MoveCommand(ICommand):
     def __init__(self, movable: IMovable) -> None:
         self._movable = movable
 

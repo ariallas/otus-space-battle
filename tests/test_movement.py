@@ -4,7 +4,7 @@ import pytest
 
 from app.exceptions import BaseSpaceBattleError
 from app.game_object import UObject
-from app.movement import MovableAdapter, Move
+from app.movement import MovableAdapter, MoveCommand
 from app.value_types import Vector
 from tests.mocks import MockUObject
 
@@ -23,7 +23,7 @@ def test_movement() -> None:
     uobj = make_movable_uobject(Vector(12, 5), Vector(-7, 3))
 
     movable = MovableAdapter(uobj)
-    move = Move(movable)
+    move = MoveCommand(movable)
     move.execute()
 
     assert movable.get_position() == Vector(5, 8)
@@ -46,7 +46,7 @@ def test_get_movable_position_error() -> None:
     uobj.get_property = get_property_side_effect
 
     with pytest.raises(BaseSpaceBattleError):
-        Move(MovableAdapter(uobj)).execute()
+        MoveCommand(MovableAdapter(uobj)).execute()
 
 
 def test_get_movable_abs_velocity_error() -> None:
@@ -61,7 +61,7 @@ def test_get_movable_abs_velocity_error() -> None:
     uobj.get_property = get_property_side_effect
 
     with pytest.raises(BaseSpaceBattleError):
-        Move(MovableAdapter(uobj)).execute()
+        MoveCommand(MovableAdapter(uobj)).execute()
 
 
 def test_movable_position_error() -> None:
@@ -76,4 +76,4 @@ def test_movable_position_error() -> None:
     uobj.set_property = set_property_side_effect
 
     with pytest.raises(BaseSpaceBattleError):
-        Move(MovableAdapter(uobj)).execute()
+        MoveCommand(MovableAdapter(uobj)).execute()
