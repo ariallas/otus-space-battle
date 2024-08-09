@@ -38,7 +38,7 @@ class RotatableAdapter(IRotatable):
         return self._uobject.get_property("rotatable_angular_velocity")
 
 
-class Rotate(ICommand):
+class RotateCommand(ICommand):
     def __init__(self, rotatable: IRotatable) -> None:
         self._rotatable = rotatable
 
