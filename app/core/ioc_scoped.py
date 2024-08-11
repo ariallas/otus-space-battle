@@ -1,42 +1,7 @@
-from collections.abc import Callable, MutableMapping
+from collections.abc import MutableMapping
 from typing import Any, Protocol
 
-from loguru import logger
-
-# TODO Exceptions
-
-## Default IoC ##
-
-
-class ResolveStrategyFunc(Protocol):
-    def __call__(self, dependency: str, *args: Any, **kwargs: Any) -> Any: ...
-
-
-def _default_ioc_resolve_strategy(dependency: str, *_args: Any, **_kwargs: Any) -> Any:
-    if dependency == "Update IoC Resolve Strategy":
-        return _update_ioc_resolve_strategy
-    raise ValueError(f"Dependency '{dependency}' not found")
-
-
-def _update_ioc_resolve_strategy(
-    strategy_updater: Callable[[ResolveStrategyFunc], ResolveStrategyFunc],
-) -> None:
-    new_strategy = strategy_updater(IoC.resolve_strategy)
-    logger.info(
-        f"Updating IoC strategy from '{IoC.resolve_strategy.__qualname__}' to '{new_strategy.__qualname__}'"
-    )
-    IoC.resolve_strategy = new_strategy
-
-
-class IoC[T]:
-    resolve_strategy: ResolveStrategyFunc = _default_ioc_resolve_strategy
-
-    @classmethod
-    def resolve(cls, dependency: str, *args: Any, **kwargs: Any) -> T:
-        return cls.resolve_strategy(dependency, *args, **kwargs)
-
-
-## Scoped IoC ##
+from app.core.ioc import IoC, ResolveStrategyFunc
 
 
 class IoCDependency(Protocol):
@@ -65,7 +30,7 @@ class ScopedIoC:
         self._root_scope["IoC.Scope.Create"] = self._create_scope
         self._root_scope["IoC.Scope.Register"] = self._register_dependency
 
-        def update_ioc_strategy(_current_strategy: ResolveStrategyFunc) -> ResolveStrategyFunc:
+        def update_ioc_strategy(_old_strategy: ResolveStrategyFunc) -> ResolveStrategyFunc:
             return self._resolve_strategy
 
         IoC.resolve("Update IoC Resolve Strategy")(update_ioc_strategy)
@@ -82,7 +47,7 @@ class ScopedIoC:
         return self._current_scope or self._root_scope
 
     def _get_parent_scope(self) -> Scope:
-        raise Exception("Root scope has no parent scope")  # noqa: TRY002
+        raise ScopedIoCError("Root scope has no parent scope")
 
     def _create_scope(self, parent: Scope | None = None) -> Scope:
         new_scope: Scope = {}
@@ -91,8 +56,8 @@ class ScopedIoC:
         new_scope["IoC.Scope.Parent"] = lambda: parent
         return new_scope
 
-    def _register_dependency(self, dependency: str, strategy: IoCDependency) -> None:
-        self._get_current_scope()[dependency] = strategy
+    def _register_dependency(self, dependency: str, dependency_func: IoCDependency) -> None:
+        self._get_current_scope()[dependency] = dependency_func
 
     def _resolve_strategy(self, dependency: str, *args: Any, **kwargs: Any) -> Any:
         scope = self._get_current_scope()
@@ -102,4 +67,8 @@ class ScopedIoC:
             scope = scope["IoC.Scope.Parent"]()
 
 
-scoped_ioc = ScopedIoC()
+_scoped_ioc = ScopedIoC()
+setup = _scoped_ioc.setup
+
+
+class ScopedIoCError(Exception): ...

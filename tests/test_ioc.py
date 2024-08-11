@@ -1,5 +1,6 @@
 from app.command import ICommand
-from app.ioc import IoC, ResolveStrategyFunc, ScopedIoC
+from app.core import ioc_scoped
+from app.core.ioc import IoC, ResolveStrategyFunc
 from app.movement import MoveCommand
 
 
@@ -18,5 +19,5 @@ def test_ioc() -> None:
 
 
 def test_ioc_init() -> None:
-    ScopedIoC().setup()
+    ioc_scoped.setup()
     print(IoC.resolve("IoC.Scope.Current"))
