@@ -1,10 +1,10 @@
 from app.command import ICommand
 from app.core import ioc_scoped
-from app.core.ioc import IoC, ResolveStrategyFunc
+from app.core.ioc import IoC, ResolveStrategy
 from app.movement import MoveCommand
 
 
-def update_ioc_strategy(current_strategy: ResolveStrategyFunc) -> ResolveStrategyFunc:
+def update_ioc_strategy(current_strategy: ResolveStrategy) -> ResolveStrategy:
     return current_strategy
 
 

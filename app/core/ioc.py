@@ -4,18 +4,18 @@ from typing import Any, Protocol
 from loguru import logger
 
 
-class ResolveStrategyFunc(Protocol):
+class ResolveStrategy(Protocol):
     def __call__(self, dependency: str, *args: Any, **kwargs: Any) -> Any: ...
 
 
 def _default_ioc_resolve_strategy(dependency: str, *_args: Any, **_kwargs: Any) -> Any:
     if dependency == "Update IoC Resolve Strategy":
         return _update_ioc_resolve_strategy
-    raise IoCDependencyNotFoundError(dependency)
+    raise IoCResolveDependencyError(f"Dependency '{dependency}' not found")
 
 
 def _update_ioc_resolve_strategy(
-    strategy_updater: Callable[[ResolveStrategyFunc], ResolveStrategyFunc],
+    strategy_updater: Callable[[ResolveStrategy], ResolveStrategy],
 ) -> None:
     new_strategy = strategy_updater(IoC.resolve_strategy)
     logger.info(
@@ -25,13 +25,11 @@ def _update_ioc_resolve_strategy(
 
 
 class IoC[T]:
-    resolve_strategy: ResolveStrategyFunc = _default_ioc_resolve_strategy
+    resolve_strategy: ResolveStrategy = _default_ioc_resolve_strategy
 
     @classmethod
     def resolve(cls, dependency: str, *args: Any, **kwargs: Any) -> T:
         return cls.resolve_strategy(dependency, *args, **kwargs)
 
 
-class IoCDependencyNotFoundError(Exception):
-    def __init__(self, dependency: str) -> None:
-        super().__init__(f"Dependency '{dependency}' not found")
+class IoCResolveDependencyError(Exception): ...
