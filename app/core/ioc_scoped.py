@@ -33,12 +33,16 @@ class ScopedIoC:
             if self._is_setup:
                 return
 
-            self._root_scope.store["IoC.Scope.Current.Set"] = self._set_scope
-            self._root_scope.store["IoC.Scope.Current.Clear"] = self._clear_scope
-            self._root_scope.store["IoC.Scope.Current"] = self._get_current_scope
-            self._root_scope.store["IoC.Scope.Parent"] = self._get_parent_scope
-            self._root_scope.store["IoC.Scope.Create"] = self._create_scope
-            self._root_scope.store["IoC.Scope.Register"] = self._register_dependency
+            default_store = {
+                "IoC.Scope.Current.Set": lambda: self._set_scope,
+                "IoC.Scope.Current.Clear": lambda: self._clear_scope,
+                "IoC.Scope.Current": self._get_current_scope,
+                "IoC.Scope.Parent": self._get_parent_scope,
+                "IoC.Scope.Create": self._create_scope,
+                "IoC.Scope.Register": lambda: self._register_dependency,
+            }
+
+            self._root_scope.store.update(default_store)
 
             def update_ioc_strategy(_old_strategy: ResolveStrategy) -> ResolveStrategy:
                 return self._resolve_strategy

@@ -29,7 +29,14 @@ class IoC[T]:
 
     @classmethod
     def resolve(cls, dependency: str, *args: Any, **kwargs: Any) -> T:
-        return cls.resolve_strategy(dependency, *args, **kwargs)
+        try:
+            return cls.resolve_strategy(dependency, *args, **kwargs)
+        except IoCResolveDependencyError:
+            raise
+        except Exception as e:
+            raise IoCResolveDependencyError(
+                f"Error resolving {dependency=}, {args=}, {kwargs=}: {e}"
+            ) from e
 
 
 class IoCResolveDependencyError(Exception): ...
