@@ -1,129 +1,105 @@
-from collections.abc import Callable
-from typing import Any, ClassVar, Protocol, override
+from collections.abc import Callable, MutableMapping
+from typing import Any, Protocol
 
 from loguru import logger
 
-from app.command import ICommand
-
-# TODO resolve_strategy or strategy or ResolveDependency?
+# TODO Exceptions
 
 ## Default IoC ##
 
 
-class IocStrategyFunc(Protocol):
+class ResolveStrategyFunc(Protocol):
     def __call__(self, dependency: str, *args: Any, **kwargs: Any) -> Any: ...
 
 
-def _default_ioc_strategy(dependency: str, *args: Any, **_kwargs: Any) -> Any:
-    if dependency == "Update Ioc Strategy":
-        return UpdateIocStrategyCommand(args[0])
+def _default_ioc_resolve_strategy(dependency: str, *_args: Any, **_kwargs: Any) -> Any:
+    if dependency == "Update IoC Resolve Strategy":
+        return _update_ioc_resolve_strategy
     raise ValueError(f"Dependency '{dependency}' not found")
 
 
-class Ioc[T]:
-    strategy: IocStrategyFunc = _default_ioc_strategy
+def _update_ioc_resolve_strategy(
+    strategy_updater: Callable[[ResolveStrategyFunc], ResolveStrategyFunc],
+) -> None:
+    new_strategy = strategy_updater(IoC.resolve_strategy)
+    logger.info(
+        f"Updating IoC strategy from '{IoC.resolve_strategy.__qualname__}' to '{new_strategy.__qualname__}'"
+    )
+    IoC.resolve_strategy = new_strategy
+
+
+class IoC[T]:
+    resolve_strategy: ResolveStrategyFunc = _default_ioc_resolve_strategy
 
     @classmethod
-    def resolve(cls, dependecy: str, *args: Any, **kwargs: Any) -> T:
-        return cls.strategy(dependecy, *args, **kwargs)
-
-
-## Updating IoC ##
-
-
-class UpdateIocStrategyCommand(ICommand):
-    def __init__(
-        self,
-        update_ioc_strategy: Callable[[IocStrategyFunc], IocStrategyFunc],
-    ) -> None:
-        self._update_ioc_strategy = update_ioc_strategy
-
-    @override
-    def execute(self) -> None:
-        new_strategy = self._update_ioc_strategy(Ioc.strategy)
-        logger.info(
-            f"Updating IoC strategy from {Ioc.strategy.__qualname__} to {new_strategy.__qualname__}"
-        )
-        Ioc.strategy = new_strategy
+    def resolve(cls, dependency: str, *args: Any, **kwargs: Any) -> T:
+        return cls.resolve_strategy(dependency, *args, **kwargs)
 
 
 ## Scoped IoC ##
 
 
-class IocDependency(Protocol):
+class IoCDependency(Protocol):
     def __call__(self, *args: Any, **kwargs: Any) -> Any: ...
 
 
-Scope = dict[str, IocDependency]
+Scope = MutableMapping[str, IoCDependency]
 
 
-class DependencyResolver:
-    def __init__(self, scope: Scope) -> None:
-        self._scope = scope
+class ScopedIoC:
+    def __init__(self) -> None:
+        # TODO Thread local
+        self._current_scope: Scope | None = None
+        self._root_scope: Scope = {}
 
-    def resolve(self, dependecy: str, *args: Any, **kwargs: Any) -> Any:
-        scope = self._scope
+        self._is_setup: bool = False
 
+    def setup(self) -> None:
+        if self._is_setup:
+            return
+
+        self._root_scope["IoC.Scope.Current.Set"] = self._set_scope
+        self._root_scope["IoC.Scope.Current.Clear"] = self._clear_scope
+        self._root_scope["IoC.Scope.Current"] = self._get_current_scope
+        self._root_scope["IoC.Scope.Parent"] = self._get_parent_scope
+        self._root_scope["IoC.Scope.Create"] = self._create_scope
+        self._root_scope["IoC.Scope.Register"] = self._register_dependency
+
+        def update_ioc_strategy(_current_strategy: ResolveStrategyFunc) -> ResolveStrategyFunc:
+            return self._resolve_strategy
+
+        IoC.resolve("Update IoC Resolve Strategy")(update_ioc_strategy)
+
+        self._is_setup = True
+
+    def _set_scope(self, scope: Scope) -> None:
+        self._current_scope = scope
+
+    def _clear_scope(self) -> None:
+        self._current_scope = None
+
+    def _get_current_scope(self) -> Scope:
+        return self._current_scope or self._root_scope
+
+    def _get_parent_scope(self) -> Scope:
+        raise Exception("Root scope has no parent scope")  # noqa: TRY002
+
+    def _create_scope(self, parent: Scope | None = None) -> Scope:
+        new_scope: Scope = {}
+        if not parent:
+            parent = self._get_current_scope()
+        new_scope["IoC.Scope.Parent"] = lambda: parent
+        return new_scope
+
+    def _register_dependency(self, dependency: str, strategy: IoCDependency) -> None:
+        self._get_current_scope()[dependency] = strategy
+
+    def _resolve_strategy(self, dependency: str, *args: Any, **kwargs: Any) -> Any:
+        scope = self._get_current_scope()
         while True:
-            if strategy := scope.get(dependecy):
+            if strategy := scope.get(dependency):
                 return strategy(*args, **kwargs)
-            scope = self._scope["IoC.Scope.Parent"]()
+            scope = scope["IoC.Scope.Parent"]()
 
 
-class RegisterDependencyCommand(ICommand):
-    def __init__(self, dependency: str, strategy: IocDependency) -> None:
-        self._dependency = dependency
-        self._strategy = strategy
-
-    @override
-    def execute(self) -> None:
-        scope = Ioc[Scope].resolve("IoC.Scope.Current")
-        scope[self._dependency] = self._strategy
-
-
-class InitScopedIoCCommand(ICommand):
-    # TODO Thread local
-    current_scope: Scope | None = None
-    root_scope: ClassVar[Scope] = {}
-
-    @override
-    def execute(self) -> None:
-        def set_scope(scope: Scope) -> None:
-            self.current_scope = scope
-
-        def clear_scope() -> None:
-            self.current_scope = None
-
-        def current_scope() -> Scope:
-            return self.current_scope or self.root_scope
-
-        def parent_scope() -> Scope:
-            raise Exception("Root scope has no parent scope")  # noqa: TRY002
-
-        def create_scope(parent: Scope | None = None) -> Scope:
-            new_scope: Scope = {}
-            if not parent:
-                parent = current_scope()
-            new_scope["IoC.Scope.Parent"] = lambda: parent
-            return new_scope
-
-        def register_dependency(dependency: str, strategy: IocDependency) -> None:
-            # TODO is this right??
-            # scope = Ioc[Scope].resolve("IoC.Scope.Current")
-            current_scope()[dependency] = strategy
-
-        self.root_scope["IoC.Scope.Current.Set"] = set_scope
-        self.root_scope["IoC.Scope.Current.Clear"] = clear_scope
-        self.root_scope["IoC.Scope.Current"] = current_scope
-        self.root_scope["IoC.Scope.Parent"] = parent_scope
-        self.root_scope["IoC.Scope.Create"] = create_scope
-        self.root_scope["IoC.Scope.Register"] = register_dependency
-
-        def update_ioc_strategy(_current_strategy: IocStrategyFunc) -> IocStrategyFunc:
-            def _resolve(dependency: str, *args: Any, **kwargs: Any) -> Any:
-                resolver = DependencyResolver(current_scope())
-                return resolver.resolve(dependency, *args, **kwargs)
-
-            return _resolve
-
-        Ioc[ICommand].resolve("Update Ioc Strategy", update_ioc_strategy).execute()
+scoped_ioc = ScopedIoC()
