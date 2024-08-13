@@ -29,3 +29,10 @@ pre-commit install
 ```
 
 Для работы pyright должен быть установлен [Node.js](https://nodejs.org/en/download/package-manager)
+
+## Тесты
+
+Запуск тестов с подсчетом покрытия:
+```bash
+pytest --cov=app --cov-report term-missing tests/
+```

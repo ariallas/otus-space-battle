@@ -38,7 +38,7 @@ class MovableAdapter(IMovable):
         return Vector.from_angle_and_length(angle, velocity)
 
 
-class Move(ICommand):
+class MoveCommand(ICommand):
     def __init__(self, movable: IMovable) -> None:
         self._movable = movable
 
@@ -48,3 +48,31 @@ class Move(ICommand):
         velocity = self._movable.get_velocity()
         logger.debug(f"Moving {self._movable} with {pos=} and {velocity=}")
         self._movable.set_position(pos + velocity)
+
+
+class ICanChangeVelocity(ABC):
+    @abstractmethod
+    def set_velocity(self, v: Vector) -> None: ...
+
+    @abstractmethod
+    def get_velocity(self) -> Vector: ...
+
+
+class CanChangeVelocityAdapter(ICanChangeVelocity):
+    def __init__(self, uobject: UObject) -> None:
+        self._uobject = uobject
+
+    @override
+    def set_velocity(self, v: Vector) -> None:
+        angle = v.get_angle()
+        length = v.get_length()
+
+        self._uobject.set_property("movable_angle", angle)
+        self._uobject.set_property("movable_abs_velocity", length)
+
+    @override
+    def get_velocity(self) -> Vector:
+        angle: Angle = self._uobject.get_property("movable_angle")
+        velocity: int = self._uobject.get_property("movable_abs_velocity")
+
+        return Vector.from_angle_and_length(angle, velocity)

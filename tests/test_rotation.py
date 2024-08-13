@@ -4,15 +4,18 @@ import pytest
 
 from app.exceptions import BaseSpaceBattleError
 from app.game_object import UObject
-from app.rotation import RotatableAdapter, Rotate
+from app.rotation import RotatableAdapter, RotateCommand
 from app.value_types import Angle
 from tests.mocks import MockUObject
 
 DIRS_NUMBER = 72
 
 
-def make_rotatable_uobject(angle: Angle, angular_velocity: Angle) -> UObject:
-    uobj = MockUObject()
+def make_rotatable_uobject(
+    angle: Angle, angular_velocity: Angle, uobj: UObject | None = None
+) -> UObject:
+    if not uobj:
+        uobj = MockUObject()
     uobj.set_property("rotatable_angle", angle)
     uobj.set_property("rotatable_angular_velocity", angular_velocity)
     return uobj
@@ -25,7 +28,7 @@ def test_rotation() -> None:
     )
 
     rotatable = RotatableAdapter(uobj)
-    rotate = Rotate(rotatable)
+    rotate = RotateCommand(rotatable)
 
     rotate.execute()
     assert rotatable.get_angle().to_degrees() == 225
@@ -49,7 +52,7 @@ def test_get_rotatable_angle_error() -> None:
     uobj.get_property = get_property_side_effect
 
     with pytest.raises(BaseSpaceBattleError):
-        Rotate(RotatableAdapter(uobj)).execute()
+        RotateCommand(RotatableAdapter(uobj)).execute()
 
 
 def test_set_rotatable_angle_error() -> None:
@@ -67,4 +70,4 @@ def test_set_rotatable_angle_error() -> None:
     uobj.set_property = set_property_side_effect
 
     with pytest.raises(BaseSpaceBattleError):
-        Rotate(RotatableAdapter(uobj)).execute()
+        RotateCommand(RotatableAdapter(uobj)).execute()
