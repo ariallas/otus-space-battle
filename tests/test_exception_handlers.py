@@ -14,7 +14,7 @@ from app.game_state import game_state
 from tests.mocks import MockCommand
 
 
-class TestError(Exception): ...
+class MockError(Exception): ...
 
 
 @pytest.fixture(autouse=True)
@@ -44,10 +44,10 @@ def test_delayed_log_exception(mock_log_exception_command: Mock) -> None:
     Тест обработчика для логгирования исключения
     """
     game_state.exception_handler_store.register_handler(
-        MockCommand, TestError, delayed_log_exception_handler
+        MockCommand, MockError, delayed_log_exception_handler
     )
     cmd = MockCommand()
-    cmd.execute = Mock(side_effect=TestError)
+    cmd.execute = Mock(side_effect=MockError)
     game_state.game_loop.put_command(cmd)
     game_state.game_loop.run_until_complete()
 
@@ -59,10 +59,10 @@ def test_delayed_first_retry() -> None:
     Тест обработчика для повторного добавления команд в очередь
     """
     game_state.exception_handler_store.register_handler(
-        MockCommand, TestError, delayed_first_retry_handler
+        MockCommand, MockError, delayed_first_retry_handler
     )
     cmd = MockCommand()
-    cmd.execute = Mock(side_effect=[TestError, None])
+    cmd.execute = Mock(side_effect=[MockError, None])
 
     game_state.game_loop.put_command(cmd)
     game_state.game_loop.run_until_complete()
@@ -76,13 +76,13 @@ def test_one_retry_then_log(mock_log_exception_command: Mock) -> None:
     при повторном выбросе исключения записать информацию в лог
     """
     game_state.exception_handler_store.register_handler(
-        MockCommand, TestError, delayed_first_retry_handler
+        MockCommand, MockError, delayed_first_retry_handler
     )
     game_state.exception_handler_store.register_default_command_handler(
         FirstRetryCommand, delayed_log_exception_handler
     )
     cmd = MockCommand()
-    cmd.execute = Mock(side_effect=TestError)
+    cmd.execute = Mock(side_effect=MockError)
 
     game_state.game_loop.put_command(cmd)
     game_state.game_loop.run_until_complete()
@@ -96,16 +96,16 @@ def test_two_retries_then_log(mock_log_exception_command: Mock) -> None:
     Тест стратегии: повторить два раза, потом записать в лог
     """
     game_state.exception_handler_store.register_handler(
-        MockCommand, TestError, delayed_first_retry_handler
+        MockCommand, MockError, delayed_first_retry_handler
     )
     game_state.exception_handler_store.register_handler(
-        FirstRetryCommand, TestError, delayed_second_retry_handler
+        FirstRetryCommand, MockError, delayed_second_retry_handler
     )
     game_state.exception_handler_store.register_default_command_handler(
         SecondRetryCommand, delayed_log_exception_handler
     )
     cmd = MockCommand()
-    cmd.execute = Mock(side_effect=TestError)
+    cmd.execute = Mock(side_effect=MockError)
 
     game_state.game_loop.put_command(cmd)
     game_state.game_loop.run_until_complete()
