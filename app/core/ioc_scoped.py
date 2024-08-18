@@ -35,7 +35,6 @@ class ScopedIoC:
                 return
 
             default_store = {
-                # "IoC.Scope.Current.Set": lambda scope: partial(self._set_scope, scope),
                 "IoC.Scope.Current.Set": LambdaCommand(self._set_scope).set_args,
                 "IoC.Scope.Current.Clear": LambdaCommand(self._clear_scope).set_args,
                 "IoC.Scope.Current": self._get_current_scope,

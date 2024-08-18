@@ -7,11 +7,11 @@ from app.game.behaviour.combined_commands import AdjustVelocityToRotationCommand
 from app.game.behaviour.fuel import BurnFuelCommand, CheckFuelCommand, UsesFuelAdapter
 from app.game.behaviour.movement import CanChangeVelocityAdapter, MovableAdapter, MoveCommand
 from app.game.behaviour.rotation import RotatableAdapter, RotateCommand
+from app.game.behaviour.tests.test_fuel import make_fuel_consumer_uobject
+from app.game.behaviour.tests.test_movement import make_movable_uobject
+from app.game.behaviour.tests.test_rotation import make_rotatable_uobject
 from app.game.value_types import Angle, Vector
 from tests.mocks import MockUObject
-from tests.test_fuel import make_fuel_consumer_uobject
-from tests.test_movement import make_movable_uobject
-from tests.test_rotation import make_rotatable_uobject
 
 
 class TstError(Exception): ...
