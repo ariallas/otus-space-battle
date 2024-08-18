@@ -3,8 +3,6 @@ from __future__ import annotations
 import math
 from typing import Self
 
-from app.exceptions import AngleAdditionError
-
 DEFAULT_DIRECTIONS_NUMBER = 72
 
 
@@ -87,3 +85,6 @@ class Angle:
             f"Angle(direction={self._direction}/{self._directions_number}, "
             f"degrees={self.to_degrees():.1f}, rad={self.to_rads():.3f})"
         )
+
+
+class AngleAdditionError(Exception): ...

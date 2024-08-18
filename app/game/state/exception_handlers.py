@@ -1,7 +1,7 @@
 from loguru import logger
 
-from app.command import ICommand
-from app.game_state import game_state
+from app.core.command import ICommand
+from app.game.state.game_state import game_state
 
 
 class DelayedCommand(ICommand):

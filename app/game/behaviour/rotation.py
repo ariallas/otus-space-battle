@@ -3,9 +3,9 @@ from typing import override
 
 from loguru import logger
 
-from app.command import ICommand
-from app.game_object import UObject
-from app.value_types import Angle
+from app.core.command import ICommand
+from app.game.uobject import UObject
+from app.game.value_types import Angle
 
 
 class IRotatable(ABC):

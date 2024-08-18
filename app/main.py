@@ -1,4 +1,4 @@
-from app.value_types import Vector
+from app.game.value_types import Vector
 
 
 def main() -> None:

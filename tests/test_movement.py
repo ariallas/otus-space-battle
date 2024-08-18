@@ -2,10 +2,10 @@ from typing import Any
 
 import pytest
 
-from app.exceptions import BaseSpaceBattleError
-from app.game_object import UObject
-from app.movement import MovableAdapter, MoveCommand
-from app.value_types import Vector
+from app.core.command import CommandError
+from app.game.behaviour.movement import MovableAdapter, MoveCommand
+from app.game.uobject import UObject
+from app.game.value_types import Vector
 from tests.mocks import MockUObject
 
 DIRS_NUMBER = 72
@@ -42,13 +42,13 @@ def test_get_movable_position_error() -> None:
 
     def get_property_side_effect(prop: str) -> Any:
         if prop == "movable_position":
-            raise BaseSpaceBattleError
+            raise CommandError
         return original_get_property(prop)
 
     original_get_property = uobj.get_property
     uobj.get_property = get_property_side_effect
 
-    with pytest.raises(BaseSpaceBattleError):
+    with pytest.raises(CommandError):
         MoveCommand(MovableAdapter(uobj)).execute()
 
 
@@ -57,13 +57,13 @@ def test_get_movable_abs_velocity_error() -> None:
 
     def get_property_side_effect(prop: str) -> Any:
         if prop == "movable_abs_velocity":
-            raise BaseSpaceBattleError
+            raise CommandError
         return original_get_property(prop)
 
     original_get_property = uobj.get_property
     uobj.get_property = get_property_side_effect
 
-    with pytest.raises(BaseSpaceBattleError):
+    with pytest.raises(CommandError):
         MoveCommand(MovableAdapter(uobj)).execute()
 
 
@@ -72,11 +72,11 @@ def test_movable_position_error() -> None:
 
     def set_property_side_effect(prop: str, value: Any) -> Any:
         if prop == "movable_position":
-            raise BaseSpaceBattleError
+            raise CommandError
         return original_set_property(prop, value)
 
     original_set_property = uobj.set_property
     uobj.set_property = set_property_side_effect
 
-    with pytest.raises(BaseSpaceBattleError):
+    with pytest.raises(CommandError):
         MoveCommand(MovableAdapter(uobj)).execute()

@@ -1,7 +1,6 @@
 import pytest
 
-from app.exceptions import AngleAdditionError
-from app.value_types import Angle, Vector
+from app.game.value_types import Angle, AngleAdditionError, Vector
 
 
 def test_vector_add() -> None:

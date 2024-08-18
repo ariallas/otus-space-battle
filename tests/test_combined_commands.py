@@ -2,13 +2,12 @@ from unittest.mock import Mock
 
 import pytest
 
-from app.combined_commands import AdjustVelocityToRotationCommand
-from app.command import ICommand, MacroCommand
-from app.exceptions import CommandError
-from app.fuel import BurnFuelCommand, CheckFuelCommand, UsesFuelAdapter
-from app.movement import CanChangeVelocityAdapter, MovableAdapter, MoveCommand
-from app.rotation import RotatableAdapter, RotateCommand
-from app.value_types import Angle, Vector
+from app.core.command import CommandError, ICommand, MacroCommand
+from app.game.behaviour.combined_commands import AdjustVelocityToRotationCommand
+from app.game.behaviour.fuel import BurnFuelCommand, CheckFuelCommand, UsesFuelAdapter
+from app.game.behaviour.movement import CanChangeVelocityAdapter, MovableAdapter, MoveCommand
+from app.game.behaviour.rotation import RotatableAdapter, RotateCommand
+from app.game.value_types import Angle, Vector
 from tests.mocks import MockUObject
 from tests.test_fuel import make_fuel_consumer_uobject
 from tests.test_movement import make_movable_uobject

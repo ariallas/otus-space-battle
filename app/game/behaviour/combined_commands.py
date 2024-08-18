@@ -2,10 +2,10 @@ from typing import override
 
 from loguru import logger
 
-from app.command import ICommand
-from app.movement import ICanChangeVelocity
-from app.rotation import IRotatable
-from app.value_types import Vector
+from app.core.command import ICommand
+from app.game.behaviour.movement import ICanChangeVelocity
+from app.game.behaviour.rotation import IRotatable
+from app.game.value_types import Vector
 
 
 class AdjustVelocityToRotationCommand(ICommand):

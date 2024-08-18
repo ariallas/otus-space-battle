@@ -1,8 +1,8 @@
 from collections.abc import Callable
 from queue import Queue
 
-from app.command import ICommand
-from app.exception_handler_store import ExceptionHandlerStore
+from app.core.command import ICommand
+from app.core.exception_handler_store import ExceptionHandlerStore
 
 
 class GameLoop:

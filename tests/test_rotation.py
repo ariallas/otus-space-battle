@@ -2,10 +2,10 @@ from typing import Any
 
 import pytest
 
-from app.exceptions import BaseSpaceBattleError
-from app.game_object import UObject
-from app.rotation import RotatableAdapter, RotateCommand
-from app.value_types import Angle
+from app.core.command import CommandError
+from app.game.behaviour.rotation import RotatableAdapter, RotateCommand
+from app.game.uobject import UObject
+from app.game.value_types import Angle
 from tests.mocks import MockUObject
 
 DIRS_NUMBER = 72
@@ -45,13 +45,13 @@ def test_get_rotatable_angle_error() -> None:
 
     def get_property_side_effect(prop: str) -> Any:
         if prop == "rotatable_angle":
-            raise BaseSpaceBattleError
+            raise CommandError
         return original_get_property(prop)
 
     original_get_property = uobj.get_property
     uobj.get_property = get_property_side_effect
 
-    with pytest.raises(BaseSpaceBattleError):
+    with pytest.raises(CommandError):
         RotateCommand(RotatableAdapter(uobj)).execute()
 
 
@@ -63,11 +63,11 @@ def test_set_rotatable_angle_error() -> None:
 
     def set_property_side_effect(prop: str, value: Any) -> Any:
         if prop == "rotatable_angle":
-            raise BaseSpaceBattleError
+            raise CommandError
         return original_get_property(prop, value)
 
     original_get_property = uobj.set_property
     uobj.set_property = set_property_side_effect
 
-    with pytest.raises(BaseSpaceBattleError):
+    with pytest.raises(CommandError):
         RotateCommand(RotatableAdapter(uobj)).execute()

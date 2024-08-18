@@ -3,7 +3,7 @@ from typing import Any, Protocol
 
 from loguru import logger
 
-from app.command import LambdaCommand
+from app.core.command import LambdaCommand
 
 
 class ResolveStrategy(Protocol):

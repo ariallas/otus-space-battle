@@ -2,8 +2,6 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import Any, Self, override
 
-from app.exceptions import CommandError
-
 
 class ICommand(ABC):
     @abstractmethod
@@ -35,3 +33,6 @@ class LambdaCommand(ICommand):
     @override
     def execute(self) -> None:
         self._func(*self._args, **self._kwargs)
+
+
+class CommandError(Exception): ...

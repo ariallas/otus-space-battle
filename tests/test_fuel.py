@@ -1,8 +1,8 @@
 import pytest
 
-from app.exceptions import CommandError
-from app.fuel import BurnFuelCommand, CheckFuelCommand, UsesFuelAdapter
-from app.game_object import UObject
+from app.core.command import CommandError
+from app.game.behaviour.fuel import BurnFuelCommand, CheckFuelCommand, UsesFuelAdapter
+from app.game.uobject import UObject
 from tests.mocks import MockUObject
 
 

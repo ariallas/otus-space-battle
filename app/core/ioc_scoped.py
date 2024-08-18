@@ -2,7 +2,7 @@ import threading
 from contextvars import ContextVar
 from typing import Any, Protocol
 
-from app.command import ICommand, LambdaCommand
+from app.core.command import ICommand, LambdaCommand
 from app.core.ioc import IoC, ResolveStrategy
 
 

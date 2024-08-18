@@ -3,9 +3,8 @@ from typing import override
 
 from loguru import logger
 
-from app.command import ICommand
-from app.exceptions import CommandError
-from app.game_object import UObject
+from app.core.command import CommandError, ICommand
+from app.game.uobject import UObject
 
 
 class IConsumesFuel(ABC):

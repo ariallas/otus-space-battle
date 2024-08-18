@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from app.exception_handlers import (
+from app.game.state.exception_handlers import (
     FirstRetryCommand,
     LogExceptionCommand,
     SecondRetryCommand,
@@ -10,7 +10,7 @@ from app.exception_handlers import (
     delayed_log_exception_handler,
     delayed_second_retry_handler,
 )
-from app.game_state import game_state
+from app.game.state.game_state import game_state
 from tests.mocks import MockCommand
 
 

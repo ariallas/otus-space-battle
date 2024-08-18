@@ -6,7 +6,7 @@ from unittest.mock import Mock
 import pytest
 from loguru import logger
 
-from app.command import ICommand
+from app.core.command import ICommand
 from app.core.ioc import IoC, IoCResolveDependencyError
 from app.core.ioc_scoped import Scope
 from app.core.ioc_scoped import setup as scoped_ioc_setup

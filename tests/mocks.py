@@ -1,7 +1,7 @@
 from typing import Any, override
 
-from app.command import ICommand
-from app.game_object import UObject
+from app.core.command import ICommand
+from app.game.uobject import UObject
 
 
 class MockUObject(UObject):

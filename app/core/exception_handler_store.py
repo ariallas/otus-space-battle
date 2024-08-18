@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from app.command import ICommand
+from app.core.command import ICommand
 
 CommandType = type[ICommand]
 ExceptionType = type[Exception]

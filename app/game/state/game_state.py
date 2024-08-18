@@ -1,5 +1,5 @@
-from app.exception_handler_store import ExceptionHandlerStore
-from app.game_loop import GameLoop
+from app.core.exception_handler_store import ExceptionHandlerStore
+from app.game.state.game_loop import GameLoop
 
 
 class GameState:
