@@ -1,5 +1,9 @@
 ## 12 - IoC Контейнер
 
+https://github.com/zaryanezrya/sturdy/blob/main/sturdy/ioc.py
+https://github.com/etyumentcev/appserver/blob/main/appserver/core/Ioc.cs
+
+
 Цель: Реализовать собственный IoC контейнер, устойчивый к изменению требований.  
 В результате выполнения домашнего задания Вы получите IoC, который можно будет использовать в качестве фасада в своих проектах.
 

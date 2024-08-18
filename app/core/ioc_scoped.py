@@ -2,6 +2,7 @@ import threading
 from contextvars import ContextVar
 from typing import Any, Protocol
 
+from app.command import ICommand, LambdaCommand
 from app.core.ioc import IoC, ResolveStrategy
 
 
@@ -34,12 +35,13 @@ class ScopedIoC:
                 return
 
             default_store = {
-                "IoC.Scope.Current.Set": lambda: self._set_scope,
-                "IoC.Scope.Current.Clear": lambda: self._clear_scope,
+                # "IoC.Scope.Current.Set": lambda scope: partial(self._set_scope, scope),
+                "IoC.Scope.Current.Set": LambdaCommand(self._set_scope).set_args,
+                "IoC.Scope.Current.Clear": LambdaCommand(self._clear_scope).set_args,
                 "IoC.Scope.Current": self._get_current_scope,
                 "IoC.Scope.Parent": self._get_parent_scope,
                 "IoC.Scope.Create": self._create_scope,
-                "IoC.Scope.Register": lambda: self._register_dependency,
+                "IoC.Scope.Register": LambdaCommand(self._register_dependency).set_args,
             }
 
             self._root_scope.store.update(default_store)
@@ -47,7 +49,7 @@ class ScopedIoC:
             def update_ioc_strategy(_old_strategy: ResolveStrategy) -> ResolveStrategy:
                 return self._resolve_strategy
 
-            IoC.resolve("Update IoC Resolve Strategy")(update_ioc_strategy)
+            IoC[ICommand].resolve("Update IoC Resolve Strategy", update_ioc_strategy).execute()
 
             self._is_setup = True
 

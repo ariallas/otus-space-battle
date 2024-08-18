@@ -3,14 +3,16 @@ from typing import Any, Protocol
 
 from loguru import logger
 
+from app.command import LambdaCommand
+
 
 class ResolveStrategy(Protocol):
     def __call__(self, dependency: str, *args: Any, **kwargs: Any) -> Any: ...
 
 
-def _default_ioc_resolve_strategy(dependency: str, *_args: Any, **_kwargs: Any) -> Any:
+def _default_ioc_resolve_strategy(dependency: str, *args: Any, **kwargs: Any) -> Any:
     if dependency == "Update IoC Resolve Strategy":
-        return _update_ioc_resolve_strategy
+        return LambdaCommand(_update_ioc_resolve_strategy).set_args(*args, **kwargs)
     raise IoCResolveDependencyError(f"Dependency '{dependency}' not found")
 
 
