@@ -12,7 +12,7 @@ class ResolveStrategy(Protocol):
 
 def _default_ioc_resolve_strategy(dependency: str, *args: Any, **kwargs: Any) -> Any:
     if dependency == "Update IoC Resolve Strategy":
-        return LambdaCommand(_update_ioc_resolve_strategy).set_args(*args, **kwargs)
+        return LambdaCommand(_update_ioc_resolve_strategy).setup(*args, **kwargs)
     raise IoCResolveDependencyError(f"Dependency '{dependency}' not found")
 
 
@@ -37,7 +37,7 @@ class IoC[T]:
             raise
         except Exception as e:
             raise IoCResolveDependencyError(
-                f"Error resolving {dependency=}, {args=}, {kwargs=}: {e}"
+                f"Unexpected error while resolving {dependency=}: {e!r}\n{args=}, {kwargs=}"
             ) from e
 
 

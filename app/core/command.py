@@ -22,10 +22,10 @@ class MacroCommand(ICommand):
 
 
 class LambdaCommand(ICommand):
-    def __init__(self, func: Callable) -> None:
+    def __init__(self, func: Callable[..., None]) -> None:
         self._func = func
 
-    def set_args(self, *args: Any, **kwargs: Any) -> Self:
+    def setup(self, *args: Any, **kwargs: Any) -> Self:
         self._args = args
         self._kwargs = kwargs
         return self

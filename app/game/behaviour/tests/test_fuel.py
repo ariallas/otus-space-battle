@@ -1,9 +1,19 @@
 import pytest
 
 from app.core.command import CommandError
-from app.game.behaviour.fuel import BurnFuelCommand, CheckFuelCommand, UsesFuelAdapter
+from app.game.behaviour.fuel import (
+    BurnFuelCommand,
+    CheckFuelCommand,
+    UsesFuelAdapter,
+    ioc_setup_iconsumesfuel,
+)
 from app.game.uobject import UObject
 from tests.mocks import MockUObject
+
+
+@pytest.fixture(autouse=True)
+def _ioc_setup() -> None:
+    ioc_setup_iconsumesfuel()
 
 
 def make_fuel_consumer_uobject(
@@ -29,6 +39,6 @@ def test_burn_fuel() -> None:
     uobj = make_fuel_consumer_uobject(10, 5)
     consumer = UsesFuelAdapter(uobj)
     BurnFuelCommand(consumer).execute()
-    assert consumer.get_fuel_amount() == 5
+    assert consumer.get_amount() == 5
     BurnFuelCommand(consumer).execute()
-    assert consumer.get_fuel_amount() == 0
+    assert consumer.get_amount() == 0

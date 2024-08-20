@@ -3,7 +3,8 @@ from typing import override
 
 from loguru import logger
 
-from app.core.command import ICommand
+from app.core.command import ICommand, LambdaCommand
+from app.core.ioc import IoC
 from app.game.uobject import UObject
 from app.game.value_types import Angle, Vector
 
@@ -18,24 +19,52 @@ class IMovable(ABC):
     def get_velocity(self) -> Vector: ...
 
 
+def ioc_setup_imovable() -> None:
+    def _get_position(uobj: UObject) -> Vector:
+        return uobj.get_property("movable_position")
+
+    IoC[ICommand].resolve(
+        "IoC.Scope.Register",
+        "IMovable.position.Get",
+        _get_position,
+    ).execute()
+
+    def _set_position(uobj: UObject, v: Vector) -> None:
+        uobj.set_property("movable_position", v)
+
+    IoC[ICommand].resolve(
+        "IoC.Scope.Register",
+        "IMovable.position.Set",
+        LambdaCommand(_set_position).setup,
+    ).execute()
+
+    def _get_velocity(uobj: UObject) -> Vector:
+        angle: Angle = uobj.get_property("movable_angle")
+        velocity: int = uobj.get_property("movable_abs_velocity")
+        return Vector.from_angle_and_length(angle, velocity)
+
+    IoC[ICommand].resolve(
+        "IoC.Scope.Register",
+        "IMovable.velocity.Get",
+        _get_velocity,
+    ).execute()
+
+
 class MovableAdapter(IMovable):
     def __init__(self, uobject: UObject) -> None:
         self._uobject = uobject
 
     @override
     def get_position(self) -> Vector:
-        return self._uobject.get_property("movable_position")
+        return IoC[Vector].resolve("IMovable.position.Get", self._uobject)
 
     @override
     def set_position(self, v: Vector) -> None:
-        return self._uobject.set_property("movable_position", v)
+        return IoC[ICommand].resolve("IMovable.position.Set", self._uobject, v).execute()
 
     @override
     def get_velocity(self) -> Vector:
-        angle: Angle = self._uobject.get_property("movable_angle")
-        velocity: int = self._uobject.get_property("movable_abs_velocity")
-
-        return Vector.from_angle_and_length(angle, velocity)
+        return IoC[Vector].resolve("IMovable.velocity.Get", self._uobject)
 
 
 class MoveCommand(ICommand):
@@ -58,21 +87,39 @@ class ICanChangeVelocity(ABC):
     def get_velocity(self) -> Vector: ...
 
 
+def ioc_setup_icanchangevelocity() -> None:
+    def _get_velocity(uobj: UObject) -> Vector:
+        angle: Angle = uobj.get_property("movable_angle")
+        velocity: int = uobj.get_property("movable_abs_velocity")
+        return Vector.from_angle_and_length(angle, velocity)
+
+    IoC[ICommand].resolve(
+        "IoC.Scope.Register",
+        "ICanChangeVelocity.velocity.Get",
+        _get_velocity,
+    ).execute()
+
+    def _set_velocity(uobj: UObject, v: Vector) -> None:
+        angle = v.get_angle()
+        length = v.get_length()
+        uobj.set_property("movable_angle", angle)
+        uobj.set_property("movable_abs_velocity", length)
+
+    IoC[ICommand].resolve(
+        "IoC.Scope.Register",
+        "ICanChangeVelocity.velocity.Set",
+        LambdaCommand(_set_velocity).setup,
+    ).execute()
+
+
 class CanChangeVelocityAdapter(ICanChangeVelocity):
     def __init__(self, uobject: UObject) -> None:
         self._uobject = uobject
 
     @override
-    def set_velocity(self, v: Vector) -> None:
-        angle = v.get_angle()
-        length = v.get_length()
-
-        self._uobject.set_property("movable_angle", angle)
-        self._uobject.set_property("movable_abs_velocity", length)
+    def get_velocity(self) -> Vector:
+        return IoC[Vector].resolve("ICanChangeVelocity.velocity.Get", self._uobject)
 
     @override
-    def get_velocity(self) -> Vector:
-        angle: Angle = self._uobject.get_property("movable_angle")
-        velocity: int = self._uobject.get_property("movable_abs_velocity")
-
-        return Vector.from_angle_and_length(angle, velocity)
+    def set_velocity(self, v: Vector) -> None:
+        return IoC[ICommand].resolve("ICanChangeVelocity.velocity.Set", self._uobject, v).execute()

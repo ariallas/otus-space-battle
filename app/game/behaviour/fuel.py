@@ -3,18 +3,48 @@ from typing import override
 
 from loguru import logger
 
-from app.core.command import CommandError, ICommand
+from app.core.command import CommandError, ICommand, LambdaCommand
+from app.core.ioc import IoC
 from app.game.uobject import UObject
 
 
 class IConsumesFuel(ABC):
     @abstractmethod
-    def get_fuel_amount(self) -> int: ...
+    def get_amount(self) -> int: ...
     @abstractmethod
-    def set_fuel_amount(self, f: int) -> None: ...
+    def set_amount(self, fuel_amount: int) -> None: ...
 
     @abstractmethod
-    def get_fuel_consumption(self) -> int: ...
+    def get_consumption(self) -> int: ...
+
+
+def ioc_setup_iconsumesfuel() -> None:
+    def _get_amount(uobj: UObject) -> int:
+        return uobj.get_property("fuel_amount")
+
+    IoC[ICommand].resolve(
+        "IoC.Scope.Register",
+        "IConsumesFuel.amount.Get",
+        _get_amount,
+    ).execute()
+
+    def _set_amount(uobj: UObject, fuel_amount: int) -> None:
+        uobj.set_property("fuel_amount", fuel_amount)
+
+    IoC[ICommand].resolve(
+        "IoC.Scope.Register",
+        "IConsumesFuel.amount.Set",
+        LambdaCommand(_set_amount).setup,
+    ).execute()
+
+    def _get_consumption(uobj: UObject) -> int:
+        return uobj.get_property("fuel_consumption")
+
+    IoC[ICommand].resolve(
+        "IoC.Scope.Register",
+        "IConsumesFuel.consumption.Get",
+        _get_consumption,
+    ).execute()
 
 
 class UsesFuelAdapter(IConsumesFuel):
@@ -22,16 +52,18 @@ class UsesFuelAdapter(IConsumesFuel):
         self._uobject = uobject
 
     @override
-    def get_fuel_amount(self) -> int:
-        return self._uobject.get_property("fuel_amount")
+    def get_amount(self) -> int:
+        return IoC[int].resolve("IConsumesFuel.amount.Get", self._uobject)
 
     @override
-    def set_fuel_amount(self, f: int) -> None:
-        return self._uobject.set_property("fuel_amount", f)
+    def set_amount(self, fuel_amount: int) -> None:
+        return (
+            IoC[ICommand].resolve("IConsumesFuel.amount.Set", self._uobject, fuel_amount).execute()
+        )
 
     @override
-    def get_fuel_consumption(self) -> int:
-        return self._uobject.get_property("fuel_consumption")
+    def get_consumption(self) -> int:
+        return IoC[int].resolve("IConsumesFuel.consumption.Get", self._uobject)
 
 
 class CheckFuelCommand(ICommand):
@@ -40,8 +72,8 @@ class CheckFuelCommand(ICommand):
 
     @override
     def execute(self) -> None:
-        current = self._consumer.get_fuel_amount()
-        required = self._consumer.get_fuel_consumption()
+        current = self._consumer.get_amount()
+        required = self._consumer.get_consumption()
         logger.debug(f"Checking if {self._consumer} has enough fuel: {current=}, {required=}")
         if current < required:
             raise CommandError(f"Not enough fuel: has {current} fuel, needs {required}")
@@ -53,7 +85,7 @@ class BurnFuelCommand(ICommand):
 
     @override
     def execute(self) -> None:
-        current = self._consumer.get_fuel_amount()
-        required = self._consumer.get_fuel_consumption()
+        current = self._consumer.get_amount()
+        required = self._consumer.get_consumption()
         logger.debug(f"Burning fuel for {self._consumer}: {current=}, {required=}")
-        self._consumer.set_fuel_amount(current - required)
+        self._consumer.set_amount(current - required)

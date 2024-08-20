@@ -4,14 +4,33 @@ import pytest
 
 from app.core.command import CommandError, ICommand, MacroCommand
 from app.game.behaviour.combined_commands import AdjustVelocityToRotationCommand
-from app.game.behaviour.fuel import BurnFuelCommand, CheckFuelCommand, UsesFuelAdapter
-from app.game.behaviour.movement import CanChangeVelocityAdapter, MovableAdapter, MoveCommand
-from app.game.behaviour.rotation import RotatableAdapter, RotateCommand
+from app.game.behaviour.fuel import (
+    BurnFuelCommand,
+    CheckFuelCommand,
+    UsesFuelAdapter,
+    ioc_setup_iconsumesfuel,
+)
+from app.game.behaviour.movement import (
+    CanChangeVelocityAdapter,
+    MovableAdapter,
+    MoveCommand,
+    ioc_setup_icanchangevelocity,
+    ioc_setup_imovable,
+)
+from app.game.behaviour.rotation import RotatableAdapter, RotateCommand, ioc_setup_irotatable
 from app.game.behaviour.tests.test_fuel import make_fuel_consumer_uobject
 from app.game.behaviour.tests.test_movement import make_movable_uobject
 from app.game.behaviour.tests.test_rotation import make_rotatable_uobject
 from app.game.value_types import Angle, Vector
 from tests.mocks import MockUObject
+
+
+@pytest.fixture(autouse=True)
+def _ioc_setup() -> None:
+    ioc_setup_imovable()
+    ioc_setup_irotatable()
+    ioc_setup_icanchangevelocity()
+    ioc_setup_iconsumesfuel()
 
 
 class TstError(Exception): ...
@@ -49,7 +68,7 @@ def test_move_and_burn_fuel() -> None:
     MacroCommand(commands).execute()
 
     assert movable.get_position() == Vector(1, 0)
-    assert fuel_consumer.get_fuel_amount() == 5
+    assert fuel_consumer.get_amount() == 5
 
 
 def test_move_and_burn_fuel_error() -> None:

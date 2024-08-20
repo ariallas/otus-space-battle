@@ -35,12 +35,12 @@ class ScopedIoC:
                 return
 
             default_store = {
-                "IoC.Scope.Current.Set": LambdaCommand(self._set_scope).set_args,
-                "IoC.Scope.Current.Clear": LambdaCommand(self._clear_scope).set_args,
+                "IoC.Scope.Current.Set": LambdaCommand(self._set_scope).setup,
+                "IoC.Scope.Current.Clear": LambdaCommand(self._clear_scope).setup,
                 "IoC.Scope.Current": self._get_current_scope,
                 "IoC.Scope.Parent": self._get_parent_scope,
                 "IoC.Scope.Create": self._create_scope,
-                "IoC.Scope.Register": LambdaCommand(self._register_dependency).set_args,
+                "IoC.Scope.Register": LambdaCommand(self._register_dependency).setup,
             }
 
             self._root_scope.store.update(default_store)
@@ -79,6 +79,8 @@ class ScopedIoC:
         while True:
             if strategy := scope.store.get(dependency):
                 return strategy(*args, **kwargs)
+            if scope is self._root_scope:
+                raise ScopedIoCError(f"Could not resolve dependency '{dependency}'")
             scope = scope.store["IoC.Scope.Parent"]()
 
 
