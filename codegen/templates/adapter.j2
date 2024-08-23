@@ -1,0 +1,24 @@
+from typing import override
+
+{% for dep_module, dep_name in dependencies %}
+from {{ dep_module }} import {{ dep_name }}
+{% endfor %}
+
+
+class {{ class_name }}({{ interface }}):
+    def __init__(self, uobject: UObject) -> None:
+        self._uobject = uobject
+
+    {% for property in get_properties %}
+    @override
+    def get_{{ property.name }}(self) -> {{ property.type }}:
+        return IoC[{{ property.type }}].resolve("{{ interface }}.{{ property.name }}.Get", self._uobject)
+
+    {% endfor %}
+
+    {% for property in set_properties %}
+    @override
+    def set_{{ property.name }}(self, value: {{ property.type }}) -> None:
+        return IoC[ICommand].resolve("{{ interface }}.{{ property.name }}.Set", self._uobject, value).execute()
+
+    {% endfor %}

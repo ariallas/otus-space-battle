@@ -16,9 +16,9 @@ class MovableAdapter(IMovable):
         return IoC[Vector].resolve("IMovable.position.Get", self._uobject)
 
     @override
-    def set_position(self, v: Vector) -> None:
-        return IoC[ICommand].resolve("IMovable.position.Set", self._uobject, v).execute()
-
-    @override
     def get_velocity(self) -> Vector:
         return IoC[Vector].resolve("IMovable.velocity.Get", self._uobject)
+
+    @override
+    def set_position(self, value: Vector) -> None:
+        return IoC[ICommand].resolve("IMovable.position.Set", self._uobject, value).execute()
