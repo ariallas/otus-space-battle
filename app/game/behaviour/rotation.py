@@ -48,23 +48,6 @@ def ioc_setup_irotatable() -> None:
     ).execute()
 
 
-class RotatableAdapter(IRotatable):
-    def __init__(self, uobject: UObject) -> None:
-        self._uobject = uobject
-
-    @override
-    def get_angle(self) -> Angle:
-        return IoC[Angle].resolve("IRotatable.angle.Get", self._uobject)
-
-    @override
-    def set_angle(self, a: Angle) -> None:
-        return IoC[ICommand].resolve("IRotatable.angle.Set", self._uobject, a).execute()
-
-    @override
-    def get_angular_velocity(self) -> Angle:
-        return IoC[Angle].resolve("IRotatable.angular_velocity.Get", self._uobject)
-
-
 class RotateCommand(ICommand):
     def __init__(self, rotatable: IRotatable) -> None:
         self._rotatable = rotatable

@@ -50,23 +50,6 @@ def ioc_setup_imovable() -> None:
     ).execute()
 
 
-class MovableAdapter(IMovable):
-    def __init__(self, uobject: UObject) -> None:
-        self._uobject = uobject
-
-    @override
-    def get_position(self) -> Vector:
-        return IoC[Vector].resolve("IMovable.position.Get", self._uobject)
-
-    @override
-    def set_position(self, v: Vector) -> None:
-        return IoC[ICommand].resolve("IMovable.position.Set", self._uobject, v).execute()
-
-    @override
-    def get_velocity(self) -> Vector:
-        return IoC[Vector].resolve("IMovable.velocity.Get", self._uobject)
-
-
 class MoveCommand(ICommand):
     def __init__(self, movable: IMovable) -> None:
         self._movable = movable
@@ -110,16 +93,3 @@ def ioc_setup_icanchangevelocity() -> None:
         "ICanChangeVelocity.velocity.Set",
         LambdaCommand(_set_velocity).setup,
     ).execute()
-
-
-class CanChangeVelocityAdapter(ICanChangeVelocity):
-    def __init__(self, uobject: UObject) -> None:
-        self._uobject = uobject
-
-    @override
-    def get_velocity(self) -> Vector:
-        return IoC[Vector].resolve("ICanChangeVelocity.velocity.Get", self._uobject)
-
-    @override
-    def set_velocity(self, v: Vector) -> None:
-        return IoC[ICommand].resolve("ICanChangeVelocity.velocity.Set", self._uobject, v).execute()
