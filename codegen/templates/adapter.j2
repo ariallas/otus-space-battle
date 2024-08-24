@@ -8,18 +8,17 @@ from {{ imp_module }} import {{ imp_name }}
 class {{ class_name }}({{ interface }}):
     def __init__(self, uobject: UObject) -> None:
         self._uobject = uobject
-
     {% for property in get_properties %}
+
     @override
     def get_{{ property.name }}(self) -> {{ property.type }}:
         return IoC[{{ property.type }}].resolve(
             "{{ interface }}.{{ property.name }}.Get",
             self._uobject,
         )
-
     {% endfor %}
-
     {% for property in set_properties %}
+
     @override
     def set_{{ property.name }}(self, value: {{ property.type }}) -> None:
         IoC[ICommand].resolve(
@@ -27,10 +26,9 @@ class {{ class_name }}({{ interface }}):
             self._uobject,
             value,
         ).execute()
-
     {% endfor %}
-
     {% for method in methods %}
+
     @override
     def {{ method.name }}(
         self,
@@ -55,6 +53,5 @@ class {{ class_name }}({{ interface }}):
             {% endfor %}
         )
         {% endif %}
-
     {% endfor %}
 

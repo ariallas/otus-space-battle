@@ -8,6 +8,18 @@ from app.game.uobject import UObject
 from codegen.common import camel2snake, create_jinja_env, parse_type
 
 
+def create_adapters(interfaces: list[type], destination: Path) -> None:
+    """
+    Генерирует и сохраняет код адаптеров по интерфейсам.
+    """
+    destination.mkdir(parents=True, exist_ok=True)
+    (destination / "__init__.py").touch()
+
+    for interface in interfaces:
+        filename, adapter_str = template_adapter(interface)
+        Path(destination / filename).write_text(adapter_str)
+
+
 @dataclass
 class Variable:
     name: str
@@ -32,20 +44,15 @@ class Adapter:
     methods: list[Method]
 
 
-def generate(interfaces: list[type], destination: Path) -> None:
+def template_adapter(interface: type) -> tuple[str, str]:
     env = create_jinja_env()
     template = env.get_template("adapter.j2")
-
-    destination.mkdir(parents=True, exist_ok=True)
-    (destination / "__init__.py").touch()
-
-    for interface in interfaces:
-        adapter = _generate_adapter(interface)
-        adapter_str = template.render(asdict(adapter))
-        Path(destination / adapter.filename).write_text(adapter_str)
+    context = _generate_template_context(interface)
+    adapter_str = template.render(asdict(context))
+    return context.filename, adapter_str
 
 
-def _generate_adapter(interface: type) -> Adapter:
+def _generate_template_context(interface: type) -> Adapter:
     class_name: str = interface.__name__[1:] + "Adapter"
 
     imports = [(cls.__module__, cls.__name__) for cls in (ICommand, IoC, UObject, interface)]
@@ -93,7 +100,7 @@ def _generate_adapter(interface: type) -> Adapter:
 
     return Adapter(
         filename=f"{camel2snake(class_name)}.py",
-        imports=list(set(imports)),
+        imports=sorted(set(imports)),
         class_name=class_name,
         interface=interface.__name__,
         get_properties=get_properties,
