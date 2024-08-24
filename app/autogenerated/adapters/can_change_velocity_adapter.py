@@ -13,10 +13,15 @@ class CanChangeVelocityAdapter(ICanChangeVelocity):
 
     @override
     def get_velocity(self) -> Vector:
-        return IoC[Vector].resolve("ICanChangeVelocity.velocity.Get", self._uobject)
+        return IoC[Vector].resolve(
+            "ICanChangeVelocity.velocity.Get",
+            self._uobject,
+        )
 
     @override
     def set_velocity(self, value: Vector) -> None:
-        return (
-            IoC[ICommand].resolve("ICanChangeVelocity.velocity.Set", self._uobject, value).execute()
-        )
+        IoC[ICommand].resolve(
+            "ICanChangeVelocity.velocity.Set",
+            self._uobject,
+            value,
+        ).execute()

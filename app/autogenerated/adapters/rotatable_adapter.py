@@ -13,12 +13,22 @@ class RotatableAdapter(IRotatable):
 
     @override
     def get_angle(self) -> Angle:
-        return IoC[Angle].resolve("IRotatable.angle.Get", self._uobject)
+        return IoC[Angle].resolve(
+            "IRotatable.angle.Get",
+            self._uobject,
+        )
 
     @override
     def get_angular_velocity(self) -> Angle:
-        return IoC[Angle].resolve("IRotatable.angular_velocity.Get", self._uobject)
+        return IoC[Angle].resolve(
+            "IRotatable.angular_velocity.Get",
+            self._uobject,
+        )
 
     @override
     def set_angle(self, value: Angle) -> None:
-        return IoC[ICommand].resolve("IRotatable.angle.Set", self._uobject, value).execute()
+        IoC[ICommand].resolve(
+            "IRotatable.angle.Set",
+            self._uobject,
+            value,
+        ).execute()

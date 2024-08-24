@@ -12,12 +12,22 @@ class ConsumesFuelAdapter(IConsumesFuel):
 
     @override
     def get_amount(self) -> int:
-        return IoC[int].resolve("IConsumesFuel.amount.Get", self._uobject)
+        return IoC[int].resolve(
+            "IConsumesFuel.amount.Get",
+            self._uobject,
+        )
 
     @override
     def get_consumption(self) -> int:
-        return IoC[int].resolve("IConsumesFuel.consumption.Get", self._uobject)
+        return IoC[int].resolve(
+            "IConsumesFuel.consumption.Get",
+            self._uobject,
+        )
 
     @override
     def set_amount(self, value: int) -> None:
-        return IoC[ICommand].resolve("IConsumesFuel.amount.Set", self._uobject, value).execute()
+        IoC[ICommand].resolve(
+            "IConsumesFuel.amount.Set",
+            self._uobject,
+            value,
+        ).execute()

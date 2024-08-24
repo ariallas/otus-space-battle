@@ -9,18 +9,27 @@ from codegen.common import camel2snake, create_jinja_env, parse_type
 
 
 @dataclass
-class Property:
+class Variable:
     name: str
     type: str
 
 
 @dataclass
+class Method:
+    name: str
+    return_type: str
+    args: list[Variable]
+
+
+@dataclass
 class Adapter:
-    dependencies: list[tuple[str, str]]
+    filename: str
+    imports: list[tuple[str, str]]
     class_name: str
     interface: str
-    get_properties: list[Property]
-    set_properties: list[Property]
+    get_properties: list[Variable]
+    set_properties: list[Variable]
+    methods: list[Method]
 
 
 def generate(interfaces: list[type], destination: Path) -> None:
@@ -33,16 +42,16 @@ def generate(interfaces: list[type], destination: Path) -> None:
     for interface in interfaces:
         adapter = _generate_adapter(interface)
         adapter_str = template.render(asdict(adapter))
-        filename = f"{camel2snake(adapter.class_name)}.py"
-        Path(destination / filename).write_text(adapter_str)
+        Path(destination / adapter.filename).write_text(adapter_str)
 
 
 def _generate_adapter(interface: type) -> Adapter:
     class_name: str = interface.__name__[1:] + "Adapter"
 
-    dependencies = [(cls.__module__, cls.__name__) for cls in (ICommand, IoC, UObject, interface)]
-    set_properties: list[Property] = []
-    get_properties: list[Property] = []
+    imports = [(cls.__module__, cls.__name__) for cls in (ICommand, IoC, UObject, interface)]
+    set_properties: list[Variable] = []
+    get_properties: list[Variable] = []
+    methods: list[Method] = []
 
     for method in interface.__dict__.values():
         if not isinstance(method, FunctionType) or method.__name__.startswith("_"):
@@ -53,27 +62,41 @@ def _generate_adapter(interface: type) -> Adapter:
             name: parse_type(annotation) for name, annotation in method.__annotations__.items()
         }
         for pa in parsed_annotations.values():
-            dependencies.extend(pa.dependencies)
+            imports.extend(pa.imports)
 
         if name.startswith("get_"):
             get_properties.append(
-                Property(
+                Variable(
                     name=name.replace("get_", ""),
                     type=parsed_annotations["return"].annotation,
                 )
             )
         elif name.startswith("set_"):
             set_properties.append(
-                Property(
+                Variable(
                     name=name.replace("set_", ""),
                     type=next(iter(parsed_annotations.values())).annotation,
                 )
             )
+        else:
+            methods.append(
+                Method(
+                    name=name,
+                    return_type=parsed_annotations["return"].annotation,
+                    args=[
+                        Variable(name=arg_name, type=arg_parsed_type.annotation)
+                        for arg_name, arg_parsed_type in parsed_annotations.items()
+                        if arg_name != "return"
+                    ],
+                )
+            )
 
     return Adapter(
-        dependencies=list(set(dependencies)),
+        filename=f"{camel2snake(class_name)}.py",
+        imports=list(set(imports)),
         class_name=class_name,
         interface=interface.__name__,
         get_properties=get_properties,
         set_properties=set_properties,
+        methods=methods,
     )

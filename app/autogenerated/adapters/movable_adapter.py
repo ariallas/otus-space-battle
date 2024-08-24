@@ -13,12 +13,22 @@ class MovableAdapter(IMovable):
 
     @override
     def get_position(self) -> Vector:
-        return IoC[Vector].resolve("IMovable.position.Get", self._uobject)
+        return IoC[Vector].resolve(
+            "IMovable.position.Get",
+            self._uobject,
+        )
 
     @override
     def get_velocity(self) -> Vector:
-        return IoC[Vector].resolve("IMovable.velocity.Get", self._uobject)
+        return IoC[Vector].resolve(
+            "IMovable.velocity.Get",
+            self._uobject,
+        )
 
     @override
     def set_position(self, value: Vector) -> None:
-        return IoC[ICommand].resolve("IMovable.position.Set", self._uobject, value).execute()
+        IoC[ICommand].resolve(
+            "IMovable.position.Set",
+            self._uobject,
+            value,
+        ).execute()

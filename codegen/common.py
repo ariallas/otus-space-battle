@@ -22,12 +22,18 @@ def camel2snake(camel: str) -> str:
 @dataclass
 class ParsedType:
     annotation: str
-    dependencies: list[tuple[str, str]]
+    imports: list[tuple[str, str]]
 
 
 def parse_type(t: Any) -> ParsedType:
+    """
+    Для типа возвращает корректную строковую аннотацию
+    и список необходимых импортов.
+    Рекурсивно обрабатывает дженерик типы.
+    """
     if t is None or t is type(None):
         return ParsedType("None", [])
+
     if not isinstance(t, GenericAlias | UnionType):
         if t.__module__ == "builtins":
             return ParsedType(t.__qualname__, [])
@@ -35,9 +41,9 @@ def parse_type(t: Any) -> ParsedType:
 
     args = [parse_type(arg) for arg in t.__args__]
 
-    dependencies: list[tuple[str, str]] = []
+    imports: list[tuple[str, str]] = []
     for arg in args:
-        dependencies.extend(arg.dependencies)
+        imports.extend(arg.imports)
 
     if isinstance(t, UnionType):
         annotation = " | ".join(arg.annotation for arg in args)
@@ -47,4 +53,5 @@ def parse_type(t: Any) -> ParsedType:
         )
     else:
         annotation = f"{t.__qualname__}[{', '.join(arg.annotation for arg in args)}]"
-    return ParsedType(annotation, dependencies)
+
+    return ParsedType(annotation, imports)
