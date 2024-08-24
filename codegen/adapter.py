@@ -5,7 +5,7 @@ from types import FunctionType
 from app.core.command import ICommand
 from app.core.ioc import IoC
 from app.game.uobject import UObject
-from codegen.common import camel2snake, create_jinja_env
+from codegen.common import camel2snake, create_jinja_env, parse_type
 
 
 @dataclass
@@ -49,24 +49,24 @@ def _generate_adapter(interface: type) -> Adapter:
             continue
 
         name = method.__name__
-        dependencies.extend(
-            (type_.__module__, type_.__name__)
-            for type_ in method.__annotations__.values()
-            if type_ and type_.__module__ != "builtins"
-        )
+        parsed_annotations = {
+            name: parse_type(annotation) for name, annotation in method.__annotations__.items()
+        }
+        for pa in parsed_annotations.values():
+            dependencies.extend(pa.dependencies)
 
         if name.startswith("get_"):
             get_properties.append(
                 Property(
                     name=name.replace("get_", ""),
-                    type=method.__annotations__["return"].__name__,
+                    type=parsed_annotations["return"].annotation,
                 )
             )
         elif name.startswith("set_"):
             set_properties.append(
                 Property(
                     name=name.replace("set_", ""),
-                    type=next(iter(method.__annotations__.values())).__name__,
+                    type=next(iter(parsed_annotations.values())).annotation,
                 )
             )
 

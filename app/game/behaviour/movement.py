@@ -12,6 +12,7 @@ from app.game.value_types import Angle, Vector
 class IMovable(ABC):
     @abstractmethod
     def get_position(self) -> Vector: ...
+
     @abstractmethod
     def set_position(self, value: Vector) -> None: ...
 
