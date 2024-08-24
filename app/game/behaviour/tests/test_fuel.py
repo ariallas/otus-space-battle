@@ -6,9 +6,9 @@ from app.game.behaviour.fuel import (
     BurnFuelCommand,
     CheckFuelCommand,
     IConsumesFuel,
-    ioc_setup_iconsumesfuel,
 )
 from app.game.setup.adapters import ioc_setup_adapters
+from app.game.setup.behaviour import ioc_setup_iconsumesfuel
 from app.game.uobject import UObject
 from tests.mocks import MockUObject
 

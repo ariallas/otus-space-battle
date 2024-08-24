@@ -39,5 +39,5 @@ ruff format && ruff check --fix --select I
 
 Запуск тестов с подсчетом покрытия:
 ```bash
-pytest --cov=app --cov-report term-missing tests/
+pytest --cov=app --cov=codegen --cov-report term-missing -s
 ```

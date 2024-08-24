@@ -9,20 +9,23 @@ from app.game.behaviour.fuel import (
     BurnFuelCommand,
     CheckFuelCommand,
     IConsumesFuel,
-    ioc_setup_iconsumesfuel,
 )
 from app.game.behaviour.movement import (
     ICanChangeVelocity,
     IMovable,
     MoveCommand,
-    ioc_setup_icanchangevelocity,
-    ioc_setup_imovable,
 )
-from app.game.behaviour.rotation import IRotatable, RotateCommand, ioc_setup_irotatable
+from app.game.behaviour.rotation import IRotatable, RotateCommand
 from app.game.behaviour.tests.test_fuel import make_fuel_consumer_uobject
 from app.game.behaviour.tests.test_movement import make_movable_uobject
 from app.game.behaviour.tests.test_rotation import make_rotatable_uobject
 from app.game.setup.adapters import ioc_setup_adapters
+from app.game.setup.behaviour import (
+    ioc_setup_icanchangevelocity,
+    ioc_setup_iconsumesfuel,
+    ioc_setup_imovable,
+    ioc_setup_irotatable,
+)
 from app.game.value_types import Angle, Vector
 from tests.mocks import MockUObject
 

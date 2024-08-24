@@ -4,8 +4,9 @@ import pytest
 
 from app.core.command import CommandError
 from app.core.ioc import IoC
-from app.game.behaviour.rotation import IRotatable, RotateCommand, ioc_setup_irotatable
+from app.game.behaviour.rotation import IRotatable, RotateCommand
 from app.game.setup.adapters import ioc_setup_adapters
+from app.game.setup.behaviour import ioc_setup_irotatable
 from app.game.uobject import UObject
 from app.game.value_types import Angle
 from tests.mocks import MockUObject

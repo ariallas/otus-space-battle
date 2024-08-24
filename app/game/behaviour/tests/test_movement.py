@@ -4,8 +4,9 @@ import pytest
 
 from app.core.command import CommandError
 from app.core.ioc import IoC
-from app.game.behaviour.movement import IMovable, MoveCommand, ioc_setup_imovable
+from app.game.behaviour.movement import IMovable, MoveCommand
 from app.game.setup.adapters import ioc_setup_adapters
+from app.game.setup.behaviour import ioc_setup_imovable
 from app.game.uobject import UObject
 from app.game.value_types import Vector
 from tests.mocks import MockUObject
