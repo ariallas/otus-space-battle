@@ -7,8 +7,10 @@ from app.core.command import ICommand, LambdaCommand
 from app.core.ioc import IoC
 from app.game.uobject import UObject
 from app.game.value_types import Angle
+from codegen.decorators import generate_adapter
 
 
+@generate_adapter
 class IRotatable(ABC):
     @abstractmethod
     def get_angle(self) -> Angle: ...

@@ -6,8 +6,10 @@ from loguru import logger
 from app.core.command import CommandError, ICommand, LambdaCommand
 from app.core.ioc import IoC
 from app.game.uobject import UObject
+from codegen.decorators import generate_adapter
 
 
+@generate_adapter
 class IConsumesFuel(ABC):
     @abstractmethod
     def get_amount(self) -> int: ...

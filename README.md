@@ -31,7 +31,7 @@ pre-commit install
 ## Генерация кода адаптеров
 
 ```bash
-python -m src.codegen
+python -m codegen.main
 ruff format && ruff check --fix --select I
 ```
 

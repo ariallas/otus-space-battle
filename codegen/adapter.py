@@ -1,6 +1,9 @@
+from abc import ABCMeta
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from types import FunctionType
+
+from loguru import logger
 
 from app.core.command import ICommand
 from app.core.ioc import IoC
@@ -8,14 +11,15 @@ from app.game.uobject import UObject
 from codegen.common import camel2snake, create_jinja_env, parse_type
 
 
-def create_adapters(interfaces: list[type], destination: Path) -> None:
+def create_adapters(interfaces: list[ABCMeta], destination: Path) -> None:
     """
     Генерирует и сохраняет код адаптеров по интерфейсам.
     """
-    destination.mkdir(parents=True, exist_ok=True)
+    destination.mkdir(exist_ok=True)
     (destination / "__init__.py").touch()
 
     for interface in interfaces:
+        logger.info(f"Generating adapter for '{interface.__name__}'")
         filename, adapter_str = template_adapter(interface)
         Path(destination / filename).write_text(adapter_str)
 
