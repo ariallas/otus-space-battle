@@ -4,38 +4,20 @@ from typing import override
 from loguru import logger
 
 from app.core.command import ICommand
-from app.game.uobject import UObject
-from app.game.value_types import Angle, Vector
+from app.game.value_types import Vector
+from codegen.decorators import generate_adapter
 
 
+@generate_adapter
 class IMovable(ABC):
     @abstractmethod
     def get_position(self) -> Vector: ...
+
     @abstractmethod
-    def set_position(self, v: Vector) -> None: ...
+    def set_position(self, value: Vector) -> None: ...
 
     @abstractmethod
     def get_velocity(self) -> Vector: ...
-
-
-class MovableAdapter(IMovable):
-    def __init__(self, uobject: UObject) -> None:
-        self._uobject = uobject
-
-    @override
-    def get_position(self) -> Vector:
-        return self._uobject.get_property("movable_position")
-
-    @override
-    def set_position(self, v: Vector) -> None:
-        return self._uobject.set_property("movable_position", v)
-
-    @override
-    def get_velocity(self) -> Vector:
-        angle: Angle = self._uobject.get_property("movable_angle")
-        velocity: int = self._uobject.get_property("movable_abs_velocity")
-
-        return Vector.from_angle_and_length(angle, velocity)
 
 
 class MoveCommand(ICommand):
@@ -50,29 +32,10 @@ class MoveCommand(ICommand):
         self._movable.set_position(pos + velocity)
 
 
+@generate_adapter
 class ICanChangeVelocity(ABC):
     @abstractmethod
-    def set_velocity(self, v: Vector) -> None: ...
+    def set_velocity(self, value: Vector) -> None: ...
 
     @abstractmethod
     def get_velocity(self) -> Vector: ...
-
-
-class CanChangeVelocityAdapter(ICanChangeVelocity):
-    def __init__(self, uobject: UObject) -> None:
-        self._uobject = uobject
-
-    @override
-    def set_velocity(self, v: Vector) -> None:
-        angle = v.get_angle()
-        length = v.get_length()
-
-        self._uobject.set_property("movable_angle", angle)
-        self._uobject.set_property("movable_abs_velocity", length)
-
-    @override
-    def get_velocity(self) -> Vector:
-        angle: Angle = self._uobject.get_property("movable_angle")
-        velocity: int = self._uobject.get_property("movable_abs_velocity")
-
-        return Vector.from_angle_and_length(angle, velocity)

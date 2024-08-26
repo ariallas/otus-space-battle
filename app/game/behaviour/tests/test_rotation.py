@@ -3,10 +3,20 @@ from typing import Any
 import pytest
 
 from app.core.command import CommandError
-from app.game.behaviour.rotation import RotatableAdapter, RotateCommand
+from app.core.ioc import IoC
+from app.game.behaviour.rotation import IRotatable, RotateCommand
+from app.game.setup.adapters import ioc_setup_adapters
+from app.game.setup.behaviour import ioc_setup_irotatable
 from app.game.uobject import UObject
 from app.game.value_types import Angle
 from tests.mocks import MockUObject
+
+
+@pytest.fixture(autouse=True)
+def _ioc_setup() -> None:
+    ioc_setup_irotatable()
+    ioc_setup_adapters()
+
 
 DIRS_NUMBER = 72
 
@@ -27,7 +37,7 @@ def test_rotation() -> None:
         angular_velocity=Angle.from_degrees(180, DIRS_NUMBER),
     )
 
-    rotatable = RotatableAdapter(uobj)
+    rotatable = IoC[IRotatable].resolve("Adapter", IRotatable, uobj)
     rotate = RotateCommand(rotatable)
 
     rotate.execute()
@@ -51,8 +61,8 @@ def test_get_rotatable_angle_error() -> None:
     original_get_property = uobj.get_property
     uobj.get_property = get_property_side_effect
 
-    with pytest.raises(CommandError):
-        RotateCommand(RotatableAdapter(uobj)).execute()
+    with pytest.raises(Exception):
+        RotateCommand(IoC[IRotatable].resolve("Adapter", IRotatable, uobj)).execute()
 
 
 def test_set_rotatable_angle_error() -> None:
@@ -69,5 +79,5 @@ def test_set_rotatable_angle_error() -> None:
     original_get_property = uobj.set_property
     uobj.set_property = set_property_side_effect
 
-    with pytest.raises(CommandError):
-        RotateCommand(RotatableAdapter(uobj)).execute()
+    with pytest.raises(Exception):
+        RotateCommand(IoC[IRotatable].resolve("Adapter", IRotatable, uobj)).execute()

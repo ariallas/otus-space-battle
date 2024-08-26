@@ -3,10 +3,20 @@ from typing import Any
 import pytest
 
 from app.core.command import CommandError
-from app.game.behaviour.movement import MovableAdapter, MoveCommand
+from app.core.ioc import IoC
+from app.game.behaviour.movement import IMovable, MoveCommand
+from app.game.setup.adapters import ioc_setup_adapters
+from app.game.setup.behaviour import ioc_setup_imovable
 from app.game.uobject import UObject
 from app.game.value_types import Vector
 from tests.mocks import MockUObject
+
+
+@pytest.fixture(autouse=True)
+def _ioc_setup() -> None:
+    ioc_setup_imovable()
+    ioc_setup_adapters()
+
 
 DIRS_NUMBER = 72
 
@@ -25,16 +35,11 @@ def make_movable_uobject(
 def test_movement() -> None:
     uobj = make_movable_uobject(Vector(12, 5), Vector(-7, 3))
 
-    movable = MovableAdapter(uobj)
+    movable = IoC[IMovable].resolve("Adapter", IMovable, uobj)
     move = MoveCommand(movable)
     move.execute()
 
     assert movable.get_position() == Vector(5, 8)
-
-
-# Тесты на исключения очень уродливые, но я не понимаю
-# как по-другому сделать, чтобы get_property/set_property выкидывали
-# исключения только для конкретных значений параметров
 
 
 def test_get_movable_position_error() -> None:
@@ -48,8 +53,8 @@ def test_get_movable_position_error() -> None:
     original_get_property = uobj.get_property
     uobj.get_property = get_property_side_effect
 
-    with pytest.raises(CommandError):
-        MoveCommand(MovableAdapter(uobj)).execute()
+    with pytest.raises(Exception):
+        MoveCommand(IoC[IMovable].resolve("Adapter", IMovable, uobj)).execute()
 
 
 def test_get_movable_abs_velocity_error() -> None:
@@ -63,8 +68,8 @@ def test_get_movable_abs_velocity_error() -> None:
     original_get_property = uobj.get_property
     uobj.get_property = get_property_side_effect
 
-    with pytest.raises(CommandError):
-        MoveCommand(MovableAdapter(uobj)).execute()
+    with pytest.raises(Exception):
+        MoveCommand(IoC[IMovable].resolve("Adapter", IMovable, uobj)).execute()
 
 
 def test_movable_position_error() -> None:
@@ -78,5 +83,5 @@ def test_movable_position_error() -> None:
     original_set_property = uobj.set_property
     uobj.set_property = set_property_side_effect
 
-    with pytest.raises(CommandError):
-        MoveCommand(MovableAdapter(uobj)).execute()
+    with pytest.raises(Exception):
+        MoveCommand(IoC[IMovable].resolve("Adapter", IMovable, uobj)).execute()

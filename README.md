@@ -28,11 +28,16 @@ poetry shell
 pre-commit install
 ```
 
-Для работы pyright должен быть установлен [Node.js](https://nodejs.org/en/download/package-manager)
+## Генерация кода адаптеров
+
+```bash
+python -m codegen.main
+ruff format && ruff check --fix --select I
+```
 
 ## Тесты
 
 Запуск тестов с подсчетом покрытия:
 ```bash
-pytest --cov=app --cov-report term-missing tests/
+pytest --cov=app --cov=codegen --cov-report term-missing -s
 ```

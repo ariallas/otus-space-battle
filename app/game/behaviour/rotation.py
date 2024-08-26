@@ -4,38 +4,19 @@ from typing import override
 from loguru import logger
 
 from app.core.command import ICommand
-from app.game.uobject import UObject
 from app.game.value_types import Angle
+from codegen.decorators import generate_adapter
 
 
+@generate_adapter
 class IRotatable(ABC):
     @abstractmethod
     def get_angle(self) -> Angle: ...
     @abstractmethod
-    def set_angle(self, a: Angle) -> None: ...
+    def set_angle(self, value: Angle) -> None: ...
 
-    # В слайдах лекции (слайд 28) angular_velocity почему-то хранилась в int,
-    # хотя у нас есть класс для представления угла. Вроде бы
-    # логично и angular_velocity хранить как Angle - поправьте, если не так
     @abstractmethod
     def get_angular_velocity(self) -> Angle: ...
-
-
-class RotatableAdapter(IRotatable):
-    def __init__(self, uobject: UObject) -> None:
-        self._uobject = uobject
-
-    @override
-    def get_angle(self) -> Angle:
-        return self._uobject.get_property("rotatable_angle")
-
-    @override
-    def set_angle(self, a: Angle) -> None:
-        return self._uobject.set_property("rotatable_angle", a)
-
-    @override
-    def get_angular_velocity(self) -> Angle:
-        return self._uobject.get_property("rotatable_angular_velocity")
 
 
 class RotateCommand(ICommand):
