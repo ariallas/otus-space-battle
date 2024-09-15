@@ -1,5 +1,6 @@
 from app.core import ioc_scoped
 from app.game.setup.adapters import ioc_setup_adapters
+from app.game.setup.state import ioc_setup_game_state
 
 # from app.game.value_types import Vector
 
@@ -25,6 +26,7 @@ def main() -> None:
 
     ioc_scoped.setup()
     ioc_setup_adapters()
+    ioc_setup_game_state()
 
 
 if __name__ == "__main__":
