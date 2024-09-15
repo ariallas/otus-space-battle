@@ -1,7 +1,8 @@
 from loguru import logger
 
 from app.core.command import ICommand
-from app.game.state.game_state import game_state
+from app.core.ioc import IoC
+from app.game.state.event_loop import EventLoop
 
 
 class DelayedCommand(ICommand):
@@ -9,7 +10,8 @@ class DelayedCommand(ICommand):
         self._cmd = cmd
 
     def execute(self) -> None:
-        return game_state.game_loop.put_command(self._cmd)
+        event_loop = IoC[EventLoop].resolve("EventLoop")
+        return event_loop.put_command(self._cmd)
 
 
 class LogExceptionCommand(ICommand):

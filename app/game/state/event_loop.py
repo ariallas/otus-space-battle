@@ -5,7 +5,7 @@ from app.core.command import ICommand
 from app.core.exception_handler_store import ExceptionHandlerStore
 
 
-class GameLoop:
+class EventLoop:
     def __init__(
         self,
         exception_handler_store: ExceptionHandlerStore,
