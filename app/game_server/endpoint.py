@@ -5,7 +5,7 @@ from fastapi import Depends, FastAPI
 from loguru import logger
 
 from app.core.ioc import IoC
-from app.server import Message, Server
+from app.game_server.server import Message, Server
 
 app = FastAPI(title="Space Battle Server")
 

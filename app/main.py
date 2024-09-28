@@ -1,8 +1,8 @@
-from app import endpoint
 from app.core import ioc_scoped
 from app.game.setup import message_handlers
 from app.game.setup.adapters import ioc_setup_adapters
-from app.server import Server
+from app.game_server import endpoint
+from app.game_server.server import Server
 
 
 def main() -> None:

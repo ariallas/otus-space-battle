@@ -4,12 +4,12 @@ from collections.abc import Iterator
 import pytest
 from fastapi.testclient import TestClient
 
-from app import endpoint
 from app.core.command import ICommand, LambdaCommand
 from app.core.ioc import IoC
 from app.core.ioc_scoped import Scope
 from app.game.setup.adapters import ioc_setup_adapters
-from app.server import Message, Server
+from app.game_server import endpoint
+from app.game_server.server import Message, Server
 
 
 @pytest.fixture(autouse=True)
