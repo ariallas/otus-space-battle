@@ -5,7 +5,7 @@ import pytest
 
 from app.core.exception_handler_store import ExceptionHandlerStore
 from app.core.ioc import IoC
-from app.game.setup.state import ioc_setup_game_state
+from app.game.setup.state import ioc_setup_event_loop, ioc_setup_exception_handler_store
 from app.game.state.event_loop import (
     EventLoop,
     HardStopEventLoopCommand,
@@ -16,7 +16,8 @@ from app.game.state.event_loop import (
 
 @pytest.fixture(autouse=True)
 def _ioc_setup() -> None:
-    ioc_setup_game_state()
+    ioc_setup_exception_handler_store()
+    ioc_setup_event_loop()
 
 
 @pytest.fixture()
