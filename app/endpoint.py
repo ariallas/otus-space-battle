@@ -1,12 +1,11 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 import uvicorn
 from fastapi import Depends, FastAPI
 from loguru import logger
-from pydantic import BaseModel
 
 from app.core.ioc import IoC
-from app.server import Server
+from app.server import Message, Server
 
 app = FastAPI(title="Space Battle Server")
 
@@ -23,16 +22,9 @@ def new_game(server: ServerDep) -> int:
     return server.new_game()
 
 
-class Message(BaseModel):
-    game_id: int
-    object_id: int
-    op_id: str
-    args: dict[str, Any]
-
-
 @app.post("/message")
-def post_message(_message: Message) -> None:
-    pass
+def post_message(message: Message, server: ServerDep) -> None:
+    server.receive_message(message)
 
 
 def start() -> None:
