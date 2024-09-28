@@ -16,8 +16,6 @@ from app.game.state.event_loop import (
 from app.game.state.exception_handlers import DelayedCommand, InjectableCommand
 from app.game.state.game_command import GameCommand
 
-EVENT_LOOP_COUNT = 3
-
 
 class Message(BaseModel):
     game_id: int
@@ -30,9 +28,9 @@ GameQueueMap = dict[int, Queue[ICommand]]
 
 
 class Server:
-    def __init__(self, event_loop_count: int = EVENT_LOOP_COUNT) -> None:
+    def __init__(self, event_loop_count: int) -> None:
         self._event_loop_count = event_loop_count
-        self._event_loops: dict[int, EventLoop] = {}
+        self.event_loops: dict[int, EventLoop] = {}
 
         self._last_game_id: int = -1
 
@@ -54,7 +52,7 @@ class Server:
 
         ioc_setup_event_loop()
         event_loop = IoC[EventLoop].resolve("EventLoop")
-        self._event_loops[loop_id] = event_loop
+        self.event_loops[loop_id] = event_loop
 
         event_loop_game_queues: GameQueueMap = {}
         IoC[ICommand].resolve(
@@ -68,7 +66,7 @@ class Server:
         RunEventLoopInThreadCommand(event_loop, el_scope).execute()
 
     def stop(self) -> None:
-        for event_loop in self._event_loops.values():
+        for event_loop in self.event_loops.values():
             event_loop.put_command(HardStopEventLoopCommand(event_loop))
 
     def new_game(self) -> int:
@@ -76,7 +74,7 @@ class Server:
         game_id = self._last_game_id
 
         event_loop_id = self._gameid_to_eventloopid(game_id)
-        event_loop = self._event_loops[event_loop_id]
+        event_loop = self.event_loops[event_loop_id]
         logger.info(f"Assigning game {game_id} to event loop {event_loop_id}")
 
         new_game_command = NewGameCommand(game_id)
@@ -86,7 +84,7 @@ class Server:
 
     def receive_message(self, message: Message) -> None:
         event_loop_id = self._gameid_to_eventloopid(message.game_id)
-        event_loop = self._event_loops[event_loop_id]
+        event_loop = self.event_loops[event_loop_id]
 
         event_loop.put_command(
             PutCommandToGameQueue(
@@ -127,7 +125,7 @@ class NewGameCommand(ICommand):
         game_command = GameCommand(
             id_=self._game_id,
             queue=game_queue,
-            quant=timedelta(seconds=1),
+            quant=timedelta(seconds=0.5),
             scope=scope,
             init=init,
         )

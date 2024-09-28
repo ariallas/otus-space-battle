@@ -11,7 +11,7 @@ def main() -> None:
 
     message_handlers.ioc_setup_move()
 
-    server = Server()
+    server = Server(event_loop_count=3)
     server.start()
     endpoint.start()
     server.stop()

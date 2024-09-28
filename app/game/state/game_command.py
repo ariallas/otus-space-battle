@@ -35,8 +35,9 @@ class GameCommand(ICommand):
         while datetime.now(UTC) - start < self._quant:
             try:
                 cmd = self._queue.get(timeout=self._quant.total_seconds())
-                cmd.execute()
             except Empty:
                 pass
+            else:
+                cmd.execute()
 
         logger.debug(f"Done with tick for game {self._id}")
