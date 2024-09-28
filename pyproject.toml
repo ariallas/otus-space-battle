@@ -43,7 +43,7 @@ ignore = [
   "PGH003",  # Use specific rule codes when ignoring type issues
   "BLE001",  # Do not catch blind exception: `Exception`
   "ERA",  # Found commented-out code
-  
+
   "PLR2004",  # Magic variable
   "T201",  # Print found
   "B017", "PT011"  # Checks for `pytest.raises(Exception)`
@@ -52,7 +52,7 @@ ignore = [
 
 
 [tool.pyright]
-include = ["app", "tests"]
+include = ["app", "tests", "codegen", "auth_app"]
 exclude = ["**/__pycache__"]
 venvPath = "."
 venv = ".venv"
