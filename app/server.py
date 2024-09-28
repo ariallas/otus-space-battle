@@ -112,7 +112,17 @@ class NewGameCommand(ICommand):
         game_queue = Queue()
 
         def init() -> None:
-            pass
+            game_items = {}
+            IoC[ICommand].resolve(
+                "IoC.Scope.Register",
+                "Game.items",
+                lambda: game_items,
+            ).execute()
+            IoC[ICommand].resolve(
+                "IoC.Scope.Register",
+                "Game.Queue",
+                lambda: game_queue,
+            ).execute()
 
         game_command = GameCommand(
             id_=self._game_id,
@@ -161,7 +171,8 @@ class InterpretCommand(ICommand):
 
     @override
     def execute(self) -> None:
-        logger.info("Executing InterpretCommand")
-        # match self._message.op_id:
-        #     case "Move":
-        #         obj = IoC[UObject].resolve("Game.Items", self._message.object_id)
+        handler_command = IoC[ICommand].resolve(
+            f"MessageHandler.{self._message.op_id}",
+            self._message,
+        )
+        handler_command.execute()
