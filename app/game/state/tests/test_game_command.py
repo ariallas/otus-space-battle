@@ -17,7 +17,7 @@ def test_game_command() -> None:
     def init() -> None:
         pass
 
-    game_cmd = GameCommand(queue, timedelta(seconds=1), scope, lambda: None)
+    game_cmd = GameCommand(1, queue, timedelta(milliseconds=1), scope, lambda: None)
     game_cmd.execute()
 
     cmd.execute.assert_called_once()

@@ -1,12 +1,13 @@
 from collections.abc import Callable
 from queue import Queue
 from threading import Thread
-from typing import override
+from typing import Any, override
 
 from loguru import logger
 
 from app.core.command import ICommand
 from app.core.exception_handler_store import ExceptionHandlerStore
+from app.core.ioc import IoC
 
 HookFunc = Callable[[], None]
 
@@ -64,13 +65,18 @@ class EventLoop:
 
 
 class RunEventLoopInThreadCommand(ICommand):
-    def __init__(self, event_loop: EventLoop) -> None:
+    def __init__(self, event_loop: EventLoop, scope: Any) -> None:
         self._event_loop = event_loop
+        self._scope = scope
 
     @override
     def execute(self) -> None:
-        thread = Thread(target=self._event_loop.run_forever)
+        thread = Thread(target=self._run)
         thread.start()
+
+    def _run(self) -> None:
+        IoC[ICommand].resolve("IoC.Scope.Current.Set", self._scope).execute()
+        self._event_loop.run_forever()
 
 
 class SoftStopEventLoopCommand(ICommand):
