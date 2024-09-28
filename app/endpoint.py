@@ -17,9 +17,9 @@ def get_server() -> Server:
 ServerDep = Annotated[Server, Depends(get_server)]
 
 
-@app.post("/game")
-def new_game(server: ServerDep) -> int:
-    return server.new_game()
+@app.post("/game/{game_id}")
+def new_game(game_id: int, server: ServerDep) -> int:
+    return server.new_game(game_id)
 
 
 @app.post("/message")

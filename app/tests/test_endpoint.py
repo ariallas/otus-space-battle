@@ -40,9 +40,9 @@ endpoint_client = TestClient(endpoint.app)
 def test_endpoint(server: Server) -> None:
     del server
 
-    response = endpoint_client.post("/game")
+    response = endpoint_client.post("/game/0")
     assert response.json() == 0
-    response = endpoint_client.post("/game")
+    response = endpoint_client.post("/game/1")
     assert response.json() == 1
 
     events = [threading.Event(), threading.Event()]
