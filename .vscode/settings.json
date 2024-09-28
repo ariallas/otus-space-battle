@@ -3,6 +3,8 @@
         "tests",
         "app",
         "codegen",
+        "codegen",
+        "auth_app",
         "-s",
         "--color=yes"
     ],
