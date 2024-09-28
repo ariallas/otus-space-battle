@@ -14,6 +14,14 @@ class DelayedCommand(ICommand):
         return event_loop.put_command(self._cmd)
 
 
+class InjectableCommand(ICommand):
+    def set_cmd(self, cmd: ICommand) -> None:
+        self._cmd = cmd
+
+    def execute(self) -> None:
+        self._cmd.execute()
+
+
 class LogExceptionCommand(ICommand):
     def __init__(self, cmd: ICommand, exc: Exception) -> None:
         self._cmd = cmd

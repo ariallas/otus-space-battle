@@ -24,6 +24,8 @@ class MacroCommand(ICommand):
 class LambdaCommand(ICommand):
     def __init__(self, func: Callable[..., None]) -> None:
         self._func = func
+        self._args = []
+        self._kwargs = {}
 
     def setup(self, *args: Any, **kwargs: Any) -> Self:
         self._args = args
