@@ -8,7 +8,7 @@ from app.game.behaviour.movement import ICanChangeVelocity, IMovable, MoveComman
 from app.game.setup.behaviour import ioc_setup_icanchangevelocity, ioc_setup_imovable
 from app.game.uobject import UObject, UObjectImpl
 from app.game.value_types import Vector
-from app.server import Message
+from app.game_server.server import Message
 
 
 def ioc_setup_move() -> None:

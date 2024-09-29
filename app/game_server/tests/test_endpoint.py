@@ -4,17 +4,11 @@ from collections.abc import Iterator
 import pytest
 from fastapi.testclient import TestClient
 
-from app import endpoint
 from app.core.command import ICommand, LambdaCommand
 from app.core.ioc import IoC
 from app.core.ioc_scoped import Scope
-from app.game.setup.adapters import ioc_setup_adapters
-from app.server import Message, Server
-
-
-@pytest.fixture(autouse=True)
-def _ioc_setup() -> None:
-    ioc_setup_adapters()
+from app.game_server import endpoint
+from app.game_server.server import Message, Server
 
 
 @pytest.fixture(autouse=True)
@@ -34,15 +28,14 @@ def server() -> Iterator[Server]:
         event.wait()
 
 
-endpoint_client = TestClient(endpoint.app)
+app = endpoint.make_fastapi_app(enable_auth=False)
+endpoint_client = TestClient(app)
 
 
-def test_endpoint(server: Server) -> None:
-    del server
-
-    response = endpoint_client.post("/game")
+def test_endpoint() -> None:
+    response = endpoint_client.post("/game/0")
     assert response.json() == 0
-    response = endpoint_client.post("/game")
+    response = endpoint_client.post("/game/1")
     assert response.json() == 1
 
     events = [threading.Event(), threading.Event()]
@@ -59,7 +52,7 @@ def test_endpoint(server: Server) -> None:
     ).execute()
 
     response = endpoint_client.post(
-        "/message",
+        "/game/0/message",
         json={
             "game_id": 0,
             "object_id": 0,
@@ -70,7 +63,7 @@ def test_endpoint(server: Server) -> None:
     assert response.status_code == 200
 
     response = endpoint_client.post(
-        "/message",
+        "/game/1/message",
         json={
             "game_id": 1,
             "object_id": 0,

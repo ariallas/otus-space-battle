@@ -32,7 +32,7 @@ def exception_handler_store() -> ExceptionHandlerStore:
 
 
 @pytest.fixture()
-def event_loop() -> EventLoop:
+def event_loop_() -> EventLoop:
     return IoC[EventLoop].resolve("EventLoop")
 
 
@@ -56,7 +56,7 @@ def mock_log_exception_command(monkeypatch: pytest.MonkeyPatch) -> Mock:
 def test_delayed_log_exception(
     mock_log_exception_command: Mock,
     exception_handler_store: ExceptionHandlerStore,
-    event_loop: EventLoop,
+    event_loop_: EventLoop,
 ) -> None:
     """
     Тест обработчика для логгирования исключения
@@ -64,15 +64,15 @@ def test_delayed_log_exception(
     exception_handler_store.register_handler(MockCommand, MockError, delayed_log_exception_handler)
     cmd = MockCommand()
     cmd.execute = Mock(side_effect=MockError)
-    event_loop.put_command(cmd)
-    event_loop.run_until_complete()
+    event_loop_.put_command(cmd)
+    event_loop_.run_until_complete()
 
     mock_log_exception_command.execute.assert_called_once()
 
 
 def test_delayed_first_retry(
     exception_handler_store: ExceptionHandlerStore,
-    event_loop: EventLoop,
+    event_loop_: EventLoop,
 ) -> None:
     """
     Тест обработчика для повторного добавления команд в очередь
@@ -81,8 +81,8 @@ def test_delayed_first_retry(
     cmd = MockCommand()
     cmd.execute = Mock(side_effect=[MockError, None])
 
-    event_loop.put_command(cmd)
-    event_loop.run_until_complete()
+    event_loop_.put_command(cmd)
+    event_loop_.run_until_complete()
 
     assert cmd.execute.call_count == 2
 
@@ -90,7 +90,7 @@ def test_delayed_first_retry(
 def test_one_retry_then_log(
     mock_log_exception_command: Mock,
     exception_handler_store: ExceptionHandlerStore,
-    event_loop: EventLoop,
+    event_loop_: EventLoop,
 ) -> None:
     """
     Тест стратегии: при первом выбросе исключения повторить команду,
@@ -103,8 +103,8 @@ def test_one_retry_then_log(
     cmd = MockCommand()
     cmd.execute = Mock(side_effect=MockError)
 
-    event_loop.put_command(cmd)
-    event_loop.run_until_complete()
+    event_loop_.put_command(cmd)
+    event_loop_.run_until_complete()
 
     assert cmd.execute.call_count == 2
     mock_log_exception_command.execute.assert_called_once()
@@ -113,7 +113,7 @@ def test_one_retry_then_log(
 def test_two_retries_then_log(
     mock_log_exception_command: Mock,
     exception_handler_store: ExceptionHandlerStore,
-    event_loop: EventLoop,
+    event_loop_: EventLoop,
 ) -> None:
     """
     Тест стратегии: повторить два раза, потом записать в лог
@@ -128,8 +128,8 @@ def test_two_retries_then_log(
     cmd = MockCommand()
     cmd.execute = Mock(side_effect=MockError)
 
-    event_loop.put_command(cmd)
-    event_loop.run_until_complete()
+    event_loop_.put_command(cmd)
+    event_loop_.run_until_complete()
 
     assert cmd.execute.call_count == 3
     mock_log_exception_command.execute.assert_called_once()

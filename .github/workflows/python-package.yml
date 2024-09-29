@@ -32,4 +32,4 @@ jobs:
 
     - name: Test with pytest
       run: |
-        poetry run pytest --cov=app --cov=codegen --cov-report term-missing -s
+        poetry run pytest --cov=app --cov=codegen --cov=auth_app --cov-report term-missing -s

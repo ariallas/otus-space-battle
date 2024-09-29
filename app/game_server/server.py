@@ -32,8 +32,6 @@ class Server:
         self._event_loop_count = event_loop_count
         self.event_loops: dict[int, EventLoop] = {}
 
-        self._last_game_id: int = -1
-
     def start(self) -> None:
         ioc_setup_exception_handler_store()
 
@@ -69,10 +67,7 @@ class Server:
         for event_loop in self.event_loops.values():
             event_loop.put_command(HardStopEventLoopCommand(event_loop))
 
-    def new_game(self) -> int:
-        self._last_game_id += 1
-        game_id = self._last_game_id
-
+    def new_game(self, game_id: int) -> int:
         event_loop_id = self._gameid_to_eventloopid(game_id)
         event_loop = self.event_loops[event_loop_id]
         logger.info(f"Assigning game {game_id} to event loop {event_loop_id}")
