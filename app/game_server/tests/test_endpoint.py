@@ -8,13 +8,15 @@ from app.core.command import ICommand, LambdaCommand
 from app.core.ioc import IoC
 from app.core.ioc_scoped import Scope
 from app.game.setup.adapters import ioc_setup_adapters
-from app.game_server import endpoint
+from app.game_server import auth, endpoint
 from app.game_server.server import Message, Server
 
 
 @pytest.fixture(autouse=True)
 def _ioc_setup() -> None:
     ioc_setup_adapters()
+    auth.ioc_setup_jwt_decoder()
+    auth.ioc_setup_mock_authorize_game_strategy()
 
 
 @pytest.fixture(autouse=True)
@@ -34,7 +36,10 @@ def server() -> Iterator[Server]:
         event.wait()
 
 
-endpoint_client = TestClient(endpoint.app)
+endpoint_client = TestClient(
+    endpoint.app,
+    headers={"Authorization": "Bearer placeholder"},
+)
 
 
 def test_endpoint(server: Server) -> None:
