@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -47,38 +46,16 @@ class GameToken(BaseModel):
 
 def decode_token(token: Annotated[str, Depends(get_token)]) -> GameToken:
     decoder = IoC[JWTDecoder].resolve("JWTDecoder")
-    token_dict = decoder.decode(token)
-    return GameToken(**token_dict)
+    try:
+        token_dict = decoder.decode(token)
+        return GameToken(**token_dict)
+    except jwt.PyJWTError as e:
+        raise HTTPException(403, "Invalid token") from e
 
 
 ###
 
-AuthorizeGameStrategy = Callable[[int, GameToken], None]
-
-
-def ioc_setup_authorize_game_strategy() -> None:
-    def authorize_game_strategy(game_id: int, token: GameToken) -> None:
-        if game_id != token.game_id:
-            raise HTTPException(401, "Not authorized")
-
-    IoC[ICommand].resolve(
-        "IoC.Scope.Register",
-        "AuthorizeGameStrategy",
-        lambda: authorize_game_strategy,
-    ).execute()
-
-
-def ioc_setup_mock_authorize_game_strategy() -> None:
-    def mock_authorize_game_strategy(game_id: int, token: GameToken) -> None:  # noqa: ARG001
-        pass
-
-    IoC[ICommand].resolve(
-        "IoC.Scope.Register",
-        "AuthorizeGameStrategy",
-        lambda: mock_authorize_game_strategy,
-    ).execute()
-
 
 def authorize_game(game_id: int, token: Annotated[GameToken, Depends(decode_token)]) -> None:
-    authorize_strategy = IoC[AuthorizeGameStrategy].resolve("AuthorizeGameStrategy")
-    authorize_strategy(game_id, token)
+    if game_id != token.game_id:
+        raise HTTPException(401, "Not authorized")

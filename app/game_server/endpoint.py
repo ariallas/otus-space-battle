@@ -1,14 +1,18 @@
 from typing import Annotated
 
-import uvicorn
-from fastapi import Depends, FastAPI, HTTPException
-from loguru import logger
+from fastapi import APIRouter, Depends, FastAPI, HTTPException
 
 from app.core.ioc import IoC
 from app.game_server.auth import authorize_game
 from app.game_server.server import Message, Server
 
-app = FastAPI(title="Space Battle Server")
+
+def make_fastapi_app(*, enable_auth: bool) -> FastAPI:
+    app = FastAPI(title="Space Battle Server")
+
+    game_router_deps = [Depends(authorize_game)] if enable_auth else []
+    app.include_router(gamerouter, prefix="/game/{game_id}", dependencies=game_router_deps)
+    return app
 
 
 def get_server() -> Server:
@@ -17,24 +21,16 @@ def get_server() -> Server:
 
 ServerDep = Annotated[Server, Depends(get_server)]
 
+gamerouter = APIRouter()
 
-@app.post("/game/{game_id}", dependencies=[Depends(authorize_game)])
+
+@gamerouter.post("")
 def new_game(game_id: int, server: ServerDep) -> int:
     return server.new_game(game_id)
 
 
-@app.post("/game/{game_id}/message", dependencies=[Depends(authorize_game)])
+@gamerouter.post("/message")
 def post_message(game_id: int, message: Message, server: ServerDep) -> None:
     if message.game_id != game_id:
         raise HTTPException(400, "Game ID is not the same in path and message")
     server.receive_message(message)
-
-
-def start() -> None:
-    logger.info("Starting uvicorn server...")
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8080,
-    )
-    logger.info("Stopped uvicorn server")
